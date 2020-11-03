@@ -1,0 +1,17 @@
+﻿<Window x:Class="CandyServer.CrmLoginPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:XrmLogin="clr-namespace:Microsoft.Xrm.Tooling.CrmConnectControl;assembly=Microsoft.Xrm.Tooling.CrmConnectControl" Name="D365Login"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DiveServer"
+        mc:Ignorable="d"
+        Title="Dynamics Login" Height="600" Width="600" Loaded="D365Login_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*"></ColumnDefinition>
+            <ColumnDefinition  Width="95*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <XrmLogin:CrmServerLoginControl Grid.Column="1"  Name="crmlogin" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></XrmLogin:CrmServerLoginControl>
+    </Grid>
+</Window>

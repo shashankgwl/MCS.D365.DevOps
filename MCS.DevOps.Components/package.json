@@ -1,0 +1,11 @@
+{
+  "name": "myproject",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@fluentui/react": "^7.149.3",
+    "@types/react": "^16.9.55",
+    "@types/xrm": "^9.0.31",
+    "@uifabric/react-hooks": "^7.13.9",
+    "typescript": "^4.0.5"
+  }
+}
