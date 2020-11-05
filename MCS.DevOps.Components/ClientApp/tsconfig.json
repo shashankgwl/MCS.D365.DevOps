@@ -17,9 +17,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "outDir": "./ClientApp/src/js",
     "jsx": "react"
   },
   "include": [
-    "src"
+    "src",
+    "src/ts"
   ]
 }

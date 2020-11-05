@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Remove="ClientApp\src\ts\SolutionGridXrm.ts" />
+    <TypeScriptCompile  Remove="ClientApp\src\ts\SolutionGridXrm.ts" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,18 +1,18 @@
 ﻿/// <reference path="../../../node_modules/@types/xrm/index.d.ts" />
 import * as React from 'react';
-  
+
 namespace MCS.DevOps.Web {
     let solORders: Array<any> = new Array<[number, string]>();
     export async function retrieveSolutionDeploymentOrder(recordId: string, exportmanaged: boolean) {
         return new Promise<Xrm.RetrieveMultipleResult>((resolve => {
             var expand = `?$select=devops_deploymentorder,_devops_solution_value&$expand=devops_solution($select=devops_name,devops_solutionguid,devops_solutionid,devops_solutionuniquename,devops_version)&$orderby=devops_deploymentorder asc&$filter=_devops_solutiondeploymentorder_value eq ${recordId}`;
- 
-            Xrm.WebApi.online.retrieveMultipleRecords("devops_solutiondeploymentorder", expand).then(
+
+            window.Xrm.WebApi.online.retrieveMultipleRecords("devops_solutiondeploymentorder", expand).then(
                 function success(results) {
                     resolve(results);
                 },
                 function (error) {
-                    Xrm.Utility.alertDialog(error.message, () => { });
+                    window.Xrm.Utility.alertDialog(error.message, () => { });
                 }
             );
         })).then(solutionOrders => {
@@ -24,17 +24,26 @@ namespace MCS.DevOps.Web {
         });
     }
 
+    export async function getUnmanagedSolutions() {
+
+        debugger;
+        return new Promise<any[]>(async resolve => {
+            var result = await window.parent.Xrm.WebApi.online.retrieveMultipleRecords("solution", "?$select=solutionid,friendlyname,ismanaged,uniquename,version&$filter=ismanaged eq false");
+            resolve(result.entities);
+        });
+    }
+
     export async function createExportStatusRecord(filename: string, exportStatus: string) {
         var entity: any = {};
         entity.devops_name = filename;
         entity.devops_status = exportStatus;
         entity["devops_Deployment@odata.bind"] = `/devops_deployments(${localStorage.getItem("recid")})`;
-        var exportStatusRecord = await Xrm.WebApi.createRecord('devops_exportstatus', entity);
+        var exportStatusRecord = await window.Xrm.WebApi.createRecord('devops_exportstatus', entity);
         return exportStatusRecord.id;
     }
 
     export async function createAnnotationRecord(fileBase64: any, filename: string) {
-        Xrm.Utility.showProgressIndicator(`Creating export status record for ${filename}`);
+        window.Xrm.Utility.showProgressIndicator(`Creating export status record for ${filename}`);
         var exportStatusRecordId = await createExportStatusRecord(filename, "Completed");
         let entity: any = {};
         entity.filename = filename;
@@ -42,7 +51,7 @@ namespace MCS.DevOps.Web {
         entity.subject = filename;
         entity.mimetype = "application/zip";
         entity.documentbody = fileBase64;
-        return Xrm.WebApi.online.createRecord("annotation", entity);
+        return window.Xrm.WebApi.online.createRecord("annotation", entity);
     }
 
 
@@ -53,7 +62,7 @@ namespace MCS.DevOps.Web {
             debugger;
             for (var i = 0; i < solORders.length; i++) {
                 console.log(`Now processing ${solORders[i][1]}`);
-                Xrm.Utility.showProgressIndicator(`Now processing ${solORders[i][1]}`);
+                window.Xrm.Utility.showProgressIndicator(`Now processing ${solORders[i][1]}`);
                 var response = await exportSolutionSingle(solORders[i][1])
                 var body: any = response.body;
                 var stream: ReadableStream = body;
@@ -73,18 +82,18 @@ namespace MCS.DevOps.Web {
                 localStorage.getItem("exportmanaged");
 
                 await createAnnotationRecord(fileBase64, solORders[i][1] + '.zip');
-                Xrm.Utility.showProgressIndicator(`Attachment created for ${solORders[i][1]}`);
+                window.Xrm.Utility.showProgressIndicator(`Attachment created for ${solORders[i][1]}`);
             }
 
-            Xrm.Utility.showProgressIndicator(`Export completed. This window will close now.`);
+            window.Xrm.Utility.showProgressIndicator(`Export completed. This window will close now.`);
             solORders.splice(0, solORders.length);
             setTimeout(() => {
-                Xrm.Utility.closeProgressIndicator();
+                window.Xrm.Utility.closeProgressIndicator();
             }, 2000);
         }
         catch (e) {
-            Xrm.Utility.alertDialog(e.message, () => { });
-            Xrm.Utility.closeProgressIndicator();
+            window.Xrm.Utility.alertDialog(e.message, () => { });
+            window.Xrm.Utility.closeProgressIndicator();
         }
 
         finally {
@@ -123,11 +132,11 @@ namespace MCS.DevOps.Web {
             }
         };
 
-        return Xrm.WebApi.online.execute(exportSolutionRequest);
+        return window.Xrm.WebApi.online.execute(exportSolutionRequest);
 
         ////Xrm.Utility.confirmDialog("This action will start exporting solutions based on the order defined in solution deployment order, do you want to continue?", () => { }, () => { });
     }
-} 
+}
 
 
 export default MCS.DevOps.Web 

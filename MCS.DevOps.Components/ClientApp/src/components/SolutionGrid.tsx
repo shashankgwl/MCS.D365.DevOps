@@ -1,9 +1,9 @@
-﻿import { Dialog, DialogType, DialogFooter } from '../../../node_modules/office-ui-fabric-react/lib/Dialog';
+﻿/// <reference path="../../../node_modules/@types/xrm/index.d.ts" />
+import { Dialog, DialogType, DialogFooter } from '../../../node_modules/office-ui-fabric-react/lib/Dialog';
 import * as React from 'react';
-import { Fabric, PrimaryButton, ProgressIndicator } from '../../../node_modules/office-ui-fabric-react/lib/';
+import { Fabric, PrimaryButton, ProgressIndicator, Label } from '../../../node_modules/office-ui-fabric-react/lib/';
 import { DetailsList, DetailsListLayoutMode, IColumn, SelectionMode } from '../../../node_modules/office-ui-fabric-react/lib/DetailsList'
-import SolutionGridXrm  from '../ts/SolutionGridXrm'
-
+import * as SolutionHelper from '../ts/SolutionGridXrm.js'
 const timeout = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -12,54 +12,16 @@ const timeout = (ms: number) => {
 function SolutionGrid() {
 
     interface ISolution {
-        name: string,
-        uniqueName: string,
-        version: string
+        friendlyname: string,
+        uniquename: string,
+        version: string,
+        solutionid: string
     }
 
-    function getSolutionRecords() {
+    const getSolutionRecords = () => {
         debugger;
-        SolutionGridXrm.beginExportSolution();
-        //let newSolutionIds : Array<any> = [];
-        //  window.parent.Xrm.WebApi.online.retrieveMultipleRecords("solution", "?$select=solutionid,friendlyname,ismanaged,uniquename,version&$filter=ismanaged eq false").then(
-        //     function success(results) {
-        //         for (var i = 0; i < results.entities.length; i++) {
-        //         var solution = {};
+        return SolutionHelper.default.getUnmanagedSolutions();
 
-        //         }
-
-        //         console.log("****************");
-        //        // console.log(solutions);
-        //         console.log("--------------");
-        //         // // console.log(solutionIdsToBeCreated);
-        //         // for (var index = 0; index < solutionIdsToBeCreated.length; index++)
-        //         // {
-        //         // console.log("****************");
-        //         // var solutionId = solutionIdsToBeCreated[index];
-        //         //     var solution = solutions[solutionId]
-        //         //     console.log(solution);
-        //         //     var data = {
-        //         //         "devops_name": solution["friendlyname"],
-        //         //         "devops_solutionuniquename": solution["uniquename"],
-        //         //         "devops_version": solution["version"],
-        //         //         "devops_solutionguid": solution["solutionid"]
-        //         //     }
-        //         //     Xrm.WebApi.createRecord("devops_solution", data).then(
-        //         //     function success(result) {
-        //         //         console.log("Custom Solution created with ID: " + result.id);
-        //         //     },
-        //         //     function (error) {
-        //         //         console.log(error.message);
-        //         //     }
-        //         // );
-        //         // }
-        //     },
-        //     function(error) {
-        //         //Xrm.Utility.alertDialog(error.message);
-        //     }
-        // );
-        //arrData = [];
-        //populateSolutionRecords(true);
     }
 
 
@@ -85,20 +47,20 @@ function SolutionGrid() {
     const columns: IColumn[] =
         [
             {
-                key: "name",
+                key: "friendlyname",
                 minWidth: 150,
-                name: "Solution Name",
-
+                name: "<u>Solution Name</u>",
                 isResizable: true,
                 isCollapsible: true,
                 data: 'string',
+                
                 onRender: (item: ISolution) => {
-                    return <span>{item.name}</span>;
+                    return <Label>{item.friendlyname}</Label>;
                 }
             },
 
             {
-                key: "uniqueName",
+                key: "uniquename",
                 minWidth: 150,
                 name: "Solution Unique Name",
 
@@ -106,7 +68,7 @@ function SolutionGrid() {
                 isCollapsible: true,
                 data: 'string',
                 onRender: (item: ISolution) => {
-                    return <span>{item.uniqueName}</span>;
+                    return <Label>{item.uniquename}</Label>;
                 }
             },
 
@@ -119,82 +81,33 @@ function SolutionGrid() {
                 isCollapsible: true,
                 data: 'string',
                 onRender: (item: ISolution) => {
-                    return <span>{item.version}</span>;
-                }
-            },
-
-            {
-                key: "Add",
-                minWidth: 150,
-                name: "Action",
-
-                isResizable: true,
-                isCollapsible: true,
-                data: 'string',
-                onRender: (item: ISolution) => {
-
-                    return <PrimaryButton onClick={clickNow}>
-                        Click to call
-                </PrimaryButton>
+                    return <Label>{item.version}</Label>;
                 }
             }
         ]
 
+    const filter = (item: ISolution) => {
+        return !item.friendlyname.includes('Active') &&
+            !item.friendlyname.includes('Basic') &&
+            !item.friendlyname.includes('Default')
+    }
     const [isLoading, setLoading] = React.useState(true);
     const [data, setData] = React.useState({});
     ////const [hideDialog, { toggle: toggleHideDialog }] = React.useBoolean(false);
     //const []=useBoolean(false);
 
     React.useEffect(() => {
-
-        getSolutionRecords();
-        timeout(3000).then(() => {
-            let sols: ISolution[] = [
-                {
-                    name: "Solution 1",
-                    uniqueName: "Solution 1",
-                    version: "1.0"
-                },
-
-                {
-                    name: "Solution 2",
-                    uniqueName: "Solution 2",
-                    version: "1.0"
-                },
-
-                {
-                    name: "Solution 3",
-                    uniqueName: "Solution 3",
-                    version: "1.0"
-                },
-
-                {
-                    name: "Solution 4",
-                    uniqueName: "Solution 4",
-                    version: "1.0"
-                },
-                {
-                    name: "Solution 5",
-                    uniqueName: "Solution 5",
-                    version: "1.0"
-                },
-                {
-                    name: "Solution 6",
-                    uniqueName: "Solution 6",
-                    version: "1.0"
-                }
-            ]
-
+        getSolutionRecords().then(entites => {
+            setData(entites.filter(filter));
             setLoading(false);
+        });;
+        //solutions
 
-            setData(sols);
-        });
-    });
+    }, []);
 
     if (isLoading) {
 
         return <ProgressIndicator description='Please wait while solution data is loading.' label='Wait while loading' />
-
     }
 
     else {
@@ -206,8 +119,7 @@ function SolutionGrid() {
                     selectionPreservedOnEmptyClick={true}
                     items={data as ISolution[]}
                     columns={columns}
-
-                    layoutMode={DetailsListLayoutMode.fixedColumns}
+                    layoutMode={DetailsListLayoutMode.justified}
                     isHeaderVisible={true}
                     selectionMode={SelectionMode.single}
                     enterModalSelectionOnTouch={true}
