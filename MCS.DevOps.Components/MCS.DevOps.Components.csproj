@@ -26,10 +26,11 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\components\SolutionGrid.tsx" />
+    <None Remove="ClientApp\src\model\models.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile  Remove="ClientApp\src\ts\SolutionGridXrm.ts" />
+    <TypeScriptCompile Remove="ClientApp\src\ts\SolutionGridXrm.ts" />
   </ItemGroup>
 
   <ItemGroup>

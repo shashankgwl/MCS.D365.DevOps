@@ -1,9 +1,12 @@
 ﻿/// <reference path="../../../node_modules/@types/xrm/index.d.ts" />
-import { Dialog, DialogType, DialogFooter } from '../../../node_modules/office-ui-fabric-react/lib/Dialog';
+import { DialogType, } from 'office-ui-fabric-react/lib/'// '../../../node_modules/office-ui-fabric-react/lib/Dialog';
 import * as React from 'react';
-import { Fabric, PrimaryButton, ProgressIndicator, Label } from '../../../node_modules/office-ui-fabric-react/lib/';
-import { DetailsList, DetailsListLayoutMode, IColumn, SelectionMode } from '../../../node_modules/office-ui-fabric-react/lib/DetailsList'
+import { IStackStyles, IStackItemStyles } from 'office-ui-fabric-react/lib/Stack';
+import { DefaultPalette } from 'office-ui-fabric-react/lib/Styling';
+import { Fabric, PrimaryButton, ProgressIndicator, Label, Stack, TooltipHost } from 'office-ui-fabric-react/lib/' // '../../../node_modules/office-ui-fabric-react/lib/';
+import { DetailsList, DetailsListLayoutMode, IColumn, SelectionMode } from 'office-ui-fabric-react/lib/'// '../../../node_modules/office-ui-fabric-react/lib/DetailsList'
 import * as SolutionHelper from '../ts/SolutionGridXrm.js'
+import { ISolution } from '../model/models'
 const timeout = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -11,17 +14,28 @@ const timeout = (ms: number) => {
 
 function SolutionGrid() {
 
-    interface ISolution {
-        friendlyname: string,
-        uniquename: string,
-        version: string,
-        solutionid: string
+    const stackStyles: IStackStyles = {
+        root: {
+            background: DefaultPalette.whiteTranslucent40,
+        },
+    };
+
+    const getDummyData = () => {
+        var kk: ISolution[] = [
+            { friendlyname: "sfsfs", uniquename: "dfsfds", solutionid: "sfs", version: "sdfs" },
+            { friendlyname: "sfsfs", uniquename: "dfsfds", solutionid: "sfs", version: "sdfs" },
+            { friendlyname: "sfsfs", uniquename: "dfsfds", solutionid: "sfs", version: "sdfs" },
+            { friendlyname: "sfsfs", uniquename: "dfsfds", solutionid: "sfs", version: "sdfs" },
+            { friendlyname: "sfsfs", uniquename: "dfsfds", solutionid: "sfs", version: "sdfs" },
+            { friendlyname: "sfsfs", uniquename: "dfsfds", solutionid: "sfs", version: "sdfs" }
+        ]
+
+        return kk;
     }
 
     const getSolutionRecords = () => {
         debugger;
         return SolutionHelper.default.getUnmanagedSolutions();
-
     }
 
 
@@ -39,9 +53,11 @@ function SolutionGrid() {
     }
 
 
-    let clickNow = () => {
-        //toggleHideDialog();
-        //alert('hail mogambo');
+    let clickNow = async () => {
+        setOperationInProgress(true);
+        await SolutionHelper.default.createSolutionRecord(data);
+        setOperationInProgress(false);
+        //timeout(5000).then(() => { setOperationInProgress(false) });
     }
 
     const columns: IColumn[] =
@@ -49,11 +65,11 @@ function SolutionGrid() {
             {
                 key: "friendlyname",
                 minWidth: 150,
-                name: "<u>Solution Name</u>",
+                name: "Solution Name",
                 isResizable: true,
                 isCollapsible: true,
                 data: 'string',
-                
+
                 onRender: (item: ISolution) => {
                     return <Label>{item.friendlyname}</Label>;
                 }
@@ -91,55 +107,77 @@ function SolutionGrid() {
             !item.friendlyname.includes('Basic') &&
             !item.friendlyname.includes('Default')
     }
-    const [isLoading, setLoading] = React.useState(true);
-    const [data, setData] = React.useState({});
+    const [opeationInPrgoress, setOperationInProgress] = React.useState(true);
+    var allSolutions: ISolution[] = [];
+    const [data, setData] = React.useState(allSolutions);
     ////const [hideDialog, { toggle: toggleHideDialog }] = React.useBoolean(false);
     //const []=useBoolean(false);
 
     React.useEffect(() => {
-        getSolutionRecords().then(entites => {
-            setData(entites.filter(filter));
-            setLoading(false);
-        });;
-        //solutions
-
+        //var bb = getDummyData();
+        //setData(bb)
+        //setOperationInProgress(false);
+        if (data.length > 0) {
+            console.log("data already exists, skipping server call.");
+            setOperationInProgress(false);
+        }
+        else {
+            console.log("data doesn't exist, calling server.");
+            getSolutionRecords().then(entites => {
+                setData(entites.filter(filter));
+                setOperationInProgress(false);
+            });
+        }
     }, []);
 
-    if (isLoading) {
+    const getVisibility = () => {
+        if (opeationInPrgoress)
+            return (
+                "block"
+            );
+        else {
 
-        return <ProgressIndicator description='Please wait while solution data is loading.' label='Wait while loading' />
+            return (
+                "none"
+            );
+        }
     }
 
-    else {
-        //let a : ISelection<IObjectWithKey> = {};
-        return (<Fabric>
-            <div className='"display":"flex","flexwrap":"wrap","data-is-scrollable"="true"'>
-                {/* <MarqueeSelection selection> */}
-                <DetailsList
-                    selectionPreservedOnEmptyClick={true}
-                    items={data as ISolution[]}
-                    columns={columns}
-                    layoutMode={DetailsListLayoutMode.justified}
-                    isHeaderVisible={true}
-                    selectionMode={SelectionMode.single}
-                    enterModalSelectionOnTouch={true}
-                    onItemInvoked={solutionItemInvoked}
-                >
-                </DetailsList>
+    return (<Fabric>
+        <div className='"display":"flex","flexwrap":"wrap","data-is-scrollable"="true"'>
+            <Stack horizontal={false} styles={stackStyles}>
+                <Stack.Item align="end">
+                    <TooltipHost content="click this button to create solution records. should be done only once.">
+                        <PrimaryButton style={{ marginTop: 5 }} disabled={opeationInPrgoress} text="import solution records." onClick={clickNow} />
+                    </TooltipHost>
+                </Stack.Item>
+                <Stack.Item>
+                    <div style={{ display: getVisibility(), width: "100%", height: "100%" }}>
+                        <ProgressIndicator label='Getting your data from server.' description="Please wait while the operation is in progress." />
+                    </div>
+                    <div style={{ display: getVisibility() === "none" ? "block" : "none", width: "100%", height: "100%" }}>
+                        <DetailsList
+                            selectionPreservedOnEmptyClick={true}
+                            items={data as ISolution[]}
+                            columns={columns}
+                            layoutMode={DetailsListLayoutMode.fixedColumns}
+                            isHeaderVisible={true}
+                            selectionMode={SelectionMode.single}
+                            enterModalSelectionOnTouch={true}
+                            onItemInvoked={solutionItemInvoked}
+                        >
+                        </DetailsList>
+                    </div>
 
-                {/* </MarqueeSelection> */}
+                </Stack.Item>
+            </Stack>
+            {/* <MarqueeSelection selection> */}
+            {/* </MarqueeSelection> */}
+        </div>
+    </Fabric>
+    );
 
-                <Dialog dialogContentProps={dialogContentProps}>
 
-                    <DialogFooter>
-                        <PrimaryButton text="Send" />
-                        <PrimaryButton text="Don't send" />
-                    </DialogFooter>
-                </Dialog>
-            </div>
-        </Fabric>
-        );
-    }
 }
 
 export default SolutionGrid

@@ -10,7 +10,9 @@ import './custom.css'
 export default class App extends Component {
   static displayName = App.name;
 
-  render () {
+    render() {
+
+        process.env.REACT_APP_CURRENTAPP = 5;
       return (
           <div>
               <SolutionGrid/>

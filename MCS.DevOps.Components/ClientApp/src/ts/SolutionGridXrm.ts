@@ -1,5 +1,6 @@
 ﻿/// <reference path="../../../node_modules/@types/xrm/index.d.ts" />
-import * as React from 'react';
+import {ISolution} from '../model/models'
+import { IDevopsSolution } from '../model/models'
 
 namespace MCS.DevOps.Web {
     let solORders: Array<any> = new Array<[number, string]>();
@@ -21,6 +22,23 @@ namespace MCS.DevOps.Web {
             });
 
             return solORders.sort((item1, item2) => { return item1.devops_deploymentorder - item2.devops_deploymentorder });
+        });
+    }
+
+    export async function createSolutionRecord(solutionData: ISolution[]) {
+        solutionData.map(solution => {
+            var devopsSol: IDevopsSolution = {
+                devops_name: solution.friendlyname,
+                devops_solutionuniquename: solution.uniquename,
+                devops_version: solution.version
+            }
+            window.parent.Xrm.WebApi.online.createRecord("devops_solution", devopsSol).then(
+                function success(result) {
+                    var newEntityId = result.id;
+                },
+                function (error) {
+                }
+            );
         });
     }
 

@@ -63,6 +63,25 @@ var MCS;
                 });
             }
             Web.retrieveSolutionDeploymentOrder = retrieveSolutionDeploymentOrder;
+            function createSolutionRecord(solutionData) {
+                return __awaiter(this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        solutionData.map(function (solution) {
+                            var devopsSol = {
+                                devops_name: solution.friendlyname,
+                                devops_solutionuniquename: solution.uniquename,
+                                devops_version: solution.version
+                            };
+                            window.parent.Xrm.WebApi.online.createRecord("devops_solution", devopsSol).then(function success(result) {
+                                var newEntityId = result.id;
+                            }, function (error) {
+                            });
+                        });
+                        return [2 /*return*/];
+                    });
+                });
+            }
+            Web.createSolutionRecord = createSolutionRecord;
             function getUnmanagedSolutions() {
                 return __awaiter(this, void 0, void 0, function () {
                     var _this = this;
