@@ -62,7 +62,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExecuteImportStatus.cs" />
-    <Compile Include="ExecuteSolutionExport.cs" />
     <Compile Include="ExecuteSolutionImport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

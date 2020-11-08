@@ -25,8 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\components\ImportButton.tsx" />
     <None Remove="ClientApp\src\components\SolutionGrid.tsx" />
+    <None Remove="ClientApp\src\components\SolutionImportWR.tsx" />
     <None Remove="ClientApp\src\model\models.ts" />
+    <None Remove="ClientApp\src\model\SolutionImportModel.ts" />
+    <None Remove="ClientApp\src\ts\SolutionImportHelper.ts" />
   </ItemGroup>
 
   <ItemGroup>

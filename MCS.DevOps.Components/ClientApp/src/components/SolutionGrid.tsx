@@ -5,7 +5,7 @@ import { IStackStyles, IStackItemStyles } from 'office-ui-fabric-react/lib/Stack
 import { DefaultPalette } from 'office-ui-fabric-react/lib/Styling';
 import { Fabric, PrimaryButton, ProgressIndicator, Label, Stack, TooltipHost } from 'office-ui-fabric-react/lib/' // '../../../node_modules/office-ui-fabric-react/lib/';
 import { DetailsList, DetailsListLayoutMode, IColumn, SelectionMode } from 'office-ui-fabric-react/lib/'// '../../../node_modules/office-ui-fabric-react/lib/DetailsList'
-import * as SolutionHelper from '../ts/SolutionGridXrm.js'
+import * as SolutionHelper from '../ts/SolutionGridXrm'
 import { ISolution } from '../model/models'
 const timeout = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -35,7 +35,7 @@ function SolutionGrid() {
 
     const getSolutionRecords = () => {
         debugger;
-        return SolutionHelper.default.getUnmanagedSolutions();
+        return SolutionHelper.getUnmanagedSolutions();
     }
 
 
@@ -55,7 +55,7 @@ function SolutionGrid() {
 
     let clickNow = async () => {
         setOperationInProgress(true);
-        await SolutionHelper.default.createSolutionRecord(data);
+        await SolutionHelper.createSolutionRecord(data);
         setOperationInProgress(false);
         //timeout(5000).then(() => { setOperationInProgress(false) });
     }

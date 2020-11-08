@@ -3,25 +3,29 @@ import { Route } from 'react-router';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { Counter } from './components/Counter';
-import  SolutionGrid  from './components/SolutionGrid'
-
+import SolutionGrid from './components/SolutionGrid'
+import SolutionImportWR from '../src/components/SolutionImportWR'
 import './custom.css'
 
 export default class App extends Component {
-  static displayName = App.name;
+    static displayName = App.name;
 
     render() {
 
-        process.env.REACT_APP_CURRENTAPP = 5;
-      return (
-          <div>
-              <SolutionGrid/>
-          </div>
-      //<Layout>
-      //  <Route exact path='/' component={Home} />
-      //      <Route path='/counter' component={Counter} />
-      //      <Route path='/fetch-data' component={SolutionGrid} />
-      //</Layout>
-    );
-  }
+        //return(
+        //    < SolutionImportWR />
+        //);
+
+        return (
+            <div>
+                {
+                    window.location.href.includes("solutionSubGrid.html") ? <SolutionGrid /> : < SolutionImportWR />}
+            </div>
+            //<Layout>
+            //  <Route exact path='/' component={Home} />
+            //      <Route path='/counter' component={Counter} />
+            //      <Route path='/fetch-data' component={SolutionGrid} />
+            //</Layout>
+        );
+    }
 }
