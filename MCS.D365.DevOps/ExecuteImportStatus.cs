@@ -56,7 +56,6 @@ namespace MCS.PSA.DevOps.Plugins
 
         private static Entity GetAsyncOperationStatus(Guid asyncId, ITracingService tracingService, IPluginExecutionContext context, EntityCollection credentials)
         {
-
             IOrganizationService targetOrganizationService = null;
 
             AliasedValue usernameAliasVal = credentials.Entities[0].GetAttributeValue<AliasedValue>("aa.devops_username");
@@ -88,7 +87,6 @@ namespace MCS.PSA.DevOps.Plugins
                 tracingService.Trace($"Connection Established Successfully.");
                 ColumnSet cols = new ColumnSet("statuscode", "friendlymessage");
                 asyncOperation = (Entity)targetOrganizationService.Retrieve("asyncoperation", asyncId, cols);
-                
             }
 
             else

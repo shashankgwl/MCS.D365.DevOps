@@ -9,9 +9,11 @@ namespace MCS.PSA.DevOps.Plugins
     using Microsoft.Xrm.Sdk.Messages;
     using System.Net;
     using System.ServiceModel.Description;
+    using System.Runtime.CompilerServices;
 
     public class ExecuteSolutionImport : IPlugin
     {
+        public bool OverWrite { get; set; }
         public void Execute(IServiceProvider serviceProvider)
         {
             var context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
@@ -28,13 +30,22 @@ namespace MCS.PSA.DevOps.Plugins
                 throw new InvalidPluginExecutionException("incomplete parameters received.");
             }
 
+            if (!context.InputParameters.Contains("UN") || !context.InputParameters.Contains("PW"))
+            {
+                throw new InvalidPluginExecutionException("Credentials not received.");
+            }
+
             var deploymentId = Guid.Parse(context.InputParameters["deploymentId"].ToString());
             var exportStatusRecord = Guid.Parse(context.InputParameters["exportStatusId"].ToString());
+            var solutionName = context.InputParameters["SolutionName"].ToString();
+            var userName = context.InputParameters["UN"].ToString();
+            var password = context.InputParameters["PW"].ToString();
+            this.OverWrite = bool.Parse(context.InputParameters["Overwrite"].ToString());
             var targetOrgCredentials = GetTargetOrgCredentials(deploymentId, service);
             var note = GetAnnotation(service, exportStatusRecord);
             fileContent = Convert.FromBase64String(note.Entities[0].GetAttributeValue<string>("documentbody"));
-            var asyncOperationId = ImportSolutionInTargetOrg(tracingService, fileContent, targetOrgCredentials);
-            CreateImportRecord(service, deploymentId, asyncOperationId);
+            var asyncOperationId = ImportSolutionInTargetOrg(tracingService, fileContent, targetOrgCredentials, userName, password);
+            CreateImportRecord(service, deploymentId, asyncOperationId, solutionName);
 
 
             //if (context.InputParameters.Contains("RecordId") && context.InputParameters.Contains("SolutionName"))
@@ -62,11 +73,13 @@ namespace MCS.PSA.DevOps.Plugins
             //}
         }
 
-        private static void CreateImportRecord(IOrganizationService service, Guid deploymentID, Guid asyncId)
+        private static void CreateImportRecord(IOrganizationService service, Guid deploymentID, Guid asyncId, string solutionName)
         {
             var importStatus = new Entity("devops_importstatus");
             importStatus.Attributes.Add("devops_deployment", new EntityReference("devops_deployment", deploymentID));
             importStatus.Attributes.Add("devops_importid", asyncId.ToString());
+            importStatus.Attributes.Add("devops_name", solutionName);
+            //SolutionName
             service.Create(importStatus);
         }
 
@@ -91,27 +104,28 @@ namespace MCS.PSA.DevOps.Plugins
             return results;
         }
 
-        private static Guid ImportSolutionInTargetOrg(ITracingService tracingService, byte[] fileContent, EntityCollection credentials)
+        private Guid ImportSolutionInTargetOrg(ITracingService tracingService, byte[] fileContent, EntityCollection credentials, string username, string password)
         {
             Guid asyncOperationId = Guid.Empty;
             IOrganizationService targetOrganizationService = null;
 
-            AliasedValue usernameAliasVal = credentials.Entities[0].GetAttributeValue<AliasedValue>("aa.devops_userid");
-            AliasedValue passwordAliasVal = credentials.Entities[0].GetAttributeValue<AliasedValue>("aa.devops_userpassword");
+            //AliasedValue usernameAliasVal = credentials.Entities[0].GetAttributeValue<AliasedValue>("aa.devops_userid");
+            //AliasedValue passwordAliasVal = credentials.Entities[0].GetAttributeValue<AliasedValue>("aa.devops_userpassword");
             AliasedValue orgSvcAliasVal = credentials.Entities[0].GetAttributeValue<AliasedValue>("aa.devops_orgserviceurl");
 
-            string userName = string.Empty;
-            string password = string.Empty;
+            //string userName = string.Empty;
+            //string password = string.Empty;
             string orgSvcUrl = string.Empty;
 
-            if (usernameAliasVal != null && passwordAliasVal != null && orgSvcAliasVal != null)
+            if (orgSvcAliasVal != null)
             {
-                userName = usernameAliasVal.Value.ToString();
-                password = passwordAliasVal.Value.ToString();
+                //userName = usernameAliasVal.Value.ToString();
+                //password = passwordAliasVal.Value.ToString();
                 orgSvcUrl = orgSvcAliasVal.Value.ToString();
             }
+
             ClientCredentials clientCredentials = new ClientCredentials();
-            clientCredentials.UserName.UserName = userName;
+            clientCredentials.UserName.UserName = username;
             clientCredentials.UserName.Password = password;
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -123,7 +137,9 @@ namespace MCS.PSA.DevOps.Plugins
                 tracingService.Trace($"Starting import in target organization");
                 var request = new ImportSolutionRequest()
                 {
-                    CustomizationFile = fileContent
+                    CustomizationFile = fileContent,
+                    OverwriteUnmanagedCustomizations = OverWrite
+
                 };
                 var requestAsync = new ExecuteAsyncRequest
                 {
@@ -146,27 +162,25 @@ namespace MCS.PSA.DevOps.Plugins
                                         <condition attribute='devops_deploymentid' operator='eq' value='{0}' />
                                         </filter>
                                     <link-entity name='devops_environment' from='devops_environmentid' to='devops_environment' link-type='inner' alias='aa'>
-      	                                <attribute name='devops_userpassword' />
-	                                    <attribute name='devops_userid' />
 	                                    <attribute name='devops_orgserviceurl' />
                                     </link-entity>
                                     </entity>
                                 </fetch>";
 
 
-    //        string fetchXml = @"<fetch version='1.0' output-format='xml - platform' mapping='logical' distinct='true'>
-    //< entity name = 'devops_environment' >
-    //     < attribute name = 'devops_userpassword' />
-    //      < attribute name = 'devops_userid' />
-    //      < attribute name = 'devops_orgserviceurl' />
-    //       < order attribute = 'devops_name' descending = 'false' />
-    //          < link - entity name = 'devops_deployment' from = 'devops_environment' to = 'devops_environmentid' link - type = 'inner' alias = 'ab' >
-    //                         < filter type = 'and' >
-    //                            < condition attribute = 'devops_deploymentid' operator= 'eq' uiname = 'QA deployment' uitype = 'devops_deployment' value = '{0}' />
-    //                                  </ filter >
-    //                                </ link - entity >
-    //                              </ entity >
-    //                            </ fetch >";
+            //        string fetchXml = @"<fetch version='1.0' output-format='xml - platform' mapping='logical' distinct='true'>
+            //< entity name = 'devops_environment' >
+            //     < attribute name = 'devops_userpassword' />
+            //      < attribute name = 'devops_userid' />
+            //      < attribute name = 'devops_orgserviceurl' />
+            //       < order attribute = 'devops_name' descending = 'false' />
+            //          < link - entity name = 'devops_deployment' from = 'devops_environment' to = 'devops_environmentid' link - type = 'inner' alias = 'ab' >
+            //                         < filter type = 'and' >
+            //                            < condition attribute = 'devops_deploymentid' operator= 'eq' uiname = 'QA deployment' uitype = 'devops_deployment' value = '{0}' />
+            //                                  </ filter >
+            //                                </ link - entity >
+            //                              </ entity >
+            //                            </ fetch >";
             fetchXml = string.Format(fetchXml, deploymentId);
             EntityCollection entityCollection = service.RetrieveMultiple(new FetchExpression(fetchXml));
             return entityCollection;

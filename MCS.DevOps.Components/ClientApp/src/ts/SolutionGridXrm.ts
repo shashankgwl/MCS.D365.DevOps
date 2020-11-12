@@ -68,6 +68,7 @@ export async function createAnnotationRecord(fileBase64: any, filename: string, 
     entity.subject = filename;
     entity.mimetype = "application/zip";
     entity.documentbody = fileBase64;
+    window.sessionStorage.setItem(exportStatusRecordId, fileBase64)
     return window.Xrm.WebApi.online.createRecord("annotation", entity);
 }
 

@@ -1,7 +1,7 @@
 ﻿/// <reference path="../../../node_modules/@types/xrm/index.d.ts" />
 import { DialogType, } from 'office-ui-fabric-react/lib/'// '../../../node_modules/office-ui-fabric-react/lib/Dialog';
 import * as React from 'react';
-import { IStackStyles, IStackItemStyles } from 'office-ui-fabric-react/lib/Stack';
+import { IStackStyles } from 'office-ui-fabric-react/lib/Stack';
 import { DefaultPalette } from 'office-ui-fabric-react/lib/Styling';
 import { Fabric, PrimaryButton, ProgressIndicator, Label, Stack, TooltipHost } from 'office-ui-fabric-react/lib/' // '../../../node_modules/office-ui-fabric-react/lib/';
 import { DetailsList, DetailsListLayoutMode, IColumn, SelectionMode } from 'office-ui-fabric-react/lib/'// '../../../node_modules/office-ui-fabric-react/lib/DetailsList'

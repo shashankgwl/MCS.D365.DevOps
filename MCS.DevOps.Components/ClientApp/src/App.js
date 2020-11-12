@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router';
-import { Layout } from './components/Layout';
-import { Home } from './components/Home';
-import { Counter } from './components/Counter';
 import SolutionGrid from './components/SolutionGrid'
 import SolutionImportWR from '../src/components/SolutionImportWR'
+import AuthCheck from '../src/components/AuthCheck'
 import './custom.css'
 
 export default class App extends Component {
@@ -16,16 +13,11 @@ export default class App extends Component {
         //    < SolutionImportWR />
         //);
 
-        return (
-            <div>
-                {
-                    window.location.href.includes("solutionSubGrid.html") ? <SolutionGrid /> : < SolutionImportWR />}
-            </div>
-            //<Layout>
-            //  <Route exact path='/' component={Home} />
-            //      <Route path='/counter' component={Counter} />
-            //      <Route path='/fetch-data' component={SolutionGrid} />
-            //</Layout>
-        );
+        if (window.location.href.includes("solutionSubGrid.html"))
+            return (<SolutionGrid />);
+        else if (window.location.href.includes("solutionImportWR.htm"))
+            return (<SolutionImportWR />)
+        else
+            return (<AuthCheck />)
     }
 }
