@@ -1,11 +1,9 @@
 ﻿/// <reference path="../../../node_modules/@types/xrm/index.d.ts" />
 
 import { AuthenticationState } from "react-aad-msal";
+import { IXrmresponse } from '../model/SolutionImportModel'
 
-export interface ICredentials {
-    UserName: string,
-    Password: string
-}
+
 export class SolutionImportHelper {
 
     constructor() {
@@ -19,8 +17,8 @@ export class SolutionImportHelper {
         });
     }
 
-    async triggerImport(deploymentId: string, exportStatusRecId: string, solutionName: string, username: string, password: string, overwrite: boolean): Promise<string> {
-        alert(`overwrite is ${overwrite}`);
+    async beginImport(deploymentId: string, exportStatusRecId: string, solutionName: string, username: string, password: string, overwrite: boolean): Promise<IXrmresponse> {
+        //alert(`overwrite is ${overwrite}`);
         var devops_executeImportRequest = {
             deploymentId: deploymentId,
             exportStatusId: exportStatusRecId,
@@ -65,10 +63,15 @@ export class SolutionImportHelper {
 
         try {
             var output = await window.parent.Xrm.WebApi.online.execute(devops_executeImportRequest);
-            return await output.text();
+            alert(output.status);
+            return new Promise(resolve => {
+                resolve({ hasError: false, message: "Operation completed successfully." });
+            });
         }
         catch (err) {
-            return err.message;
+            return new Promise((resolve, reject) => {
+                reject({ hasError: true, message: err.message });
+            });
         }
 
     }

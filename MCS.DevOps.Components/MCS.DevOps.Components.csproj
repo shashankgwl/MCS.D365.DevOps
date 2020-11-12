@@ -25,6 +25,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\WeatherForecastController.cs" />
+    <Compile Remove="Pages\Error.cshtml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Pages\Error.cshtml" />
+    <Content Remove="Pages\_ViewImports.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="ClientApp\src\components\AuthCheck.tsx" />
     <None Remove="ClientApp\src\components\Counter.js" />
     <None Remove="ClientApp\src\components\FetchData.js" />
@@ -37,11 +47,18 @@
     <None Remove="ClientApp\src\components\SolutionImportWR.tsx" />
     <None Remove="ClientApp\src\model\models.ts" />
     <None Remove="ClientApp\src\model\SolutionImportModel.ts" />
+    <None Remove="ClientApp\src\ts\OmniChannel.ts" />
     <None Remove="ClientApp\src\ts\SolutionImportHelper.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Remove="ClientApp\src\ts\OmniChannel.ts" />
     <TypeScriptCompile Remove="ClientApp\src\ts\SolutionGridXrm.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Pages\" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

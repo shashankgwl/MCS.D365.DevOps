@@ -1,13 +1,14 @@
 ﻿import * as React from 'react';
 import { DetailsList, DetailsListLayoutMode, IColumn, Selection, SelectionMode } from '../../../node_modules/office-ui-fabric-react/lib/DetailsList'
 //import AzureAD from 'react-aad-msal'
-import { IDevOpsExportStatus } from '../model/SolutionImportModel'
+import { IDevOpsExportStatus, ISolutionImportProgress, IXrmresponse } from '../model/SolutionImportModel'
 import { PrimaryButton, Fabric, MarqueeSelection, ProgressIndicator, Toggle } from '../../../node_modules/office-ui-fabric-react/lib'
-import { Dialog, DialogType, DialogFooter, TextField } from '../../../node_modules/office-ui-fabric-react/lib'
-import { Stack, StackItem, IStackTokens } from '../../../node_modules/office-ui-fabric-react/lib/Stack'
-import { SolutionImportHelper, ICredentials } from '../ts/SolutionImportHelper'
+import { Dialog, DialogType, DialogFooter, TextField, Panel, PanelType } from '../../../node_modules/office-ui-fabric-react/lib'
+import { Stack, StackItem, IStackTokens, IStackItemStyles, IStackStyles } from '../../../node_modules/office-ui-fabric-react/lib/Stack'
+import { SolutionImportHelper } from '../ts/SolutionImportHelper'
 import { useBoolean } from '@uifabric/react-hooks'
 import { authProvider } from '../../src/js/authProvider'
+import ImportPanel from './ImportPanel';
 //import ImportPanel from '../components/ImportPanel'
 function SolutionImportWR() {
     const columns: IColumn[] =
@@ -70,18 +71,27 @@ function SolutionImportWR() {
         }
     }
 
+    interface IDialogProps {
+        header: string,
+        message: string
+    }
+
+    let dialogProps: IDialogProps = { header: '', message: '' };
     let curSelItem: IDevOpsExportStatus = { name: "", devops_exportstatusid: "" };
     let ab: IDevOpsExportStatus[] = [];
+    const importProgressModel: ISolutionImportProgress[] = [];
     const [operationInProgress, setOperationInProgresss] = React.useState(false);
     const [importInProgress, setImportInProgress] = React.useState(false);
     const [showCreds, setShowCreds] = React.useState(true);
     const [selItem, setSelectedItem] = React.useState(curSelItem);
     const [userid, setUserID] = React.useState('');
     const [pwd, setPwd] = React.useState('');
-    const [dialogMessage, setDialogMessage] = React.useState('');
+    const [dialogMessage, setDialogMessage] = React.useState(dialogProps);
     const [hideDialog, { toggle: toggleHideDialog }] = useBoolean(true);
     const [overwrite, { toggle: setOverWrite }] = useBoolean(true);
+    const [pnlOpen, { toggle: setPanelOpen }] = useBoolean(false);
     const [data, setData] = React.useState(ab);
+    const [importProgress, setSolutionImportProgress] = React.useState(importProgressModel);
     const timer = (ms: number) => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -90,6 +100,24 @@ function SolutionImportWR() {
         childrenGap: 10,
         padding: 10,
     };
+
+    const cardStackStyle: IStackStyles = {
+        root:
+        {
+            border: "15",
+            borderColor: "blue",
+            backgroundColor: "#c7c5c1"
+        }
+    }
+
+    const cardStackItemStyle: IStackItemStyles =
+    {
+        root:
+        {
+            height: "100%",
+            color : "white"
+        }
+    }
 
     const getText = (): string => {
         if (importInProgress)
@@ -107,14 +135,14 @@ function SolutionImportWR() {
 
     const successdialogContentProps = {
         type: DialogType.normal,
-        title: 'Success',
-        subText: { dialogMessage } //,
+        title: `${dialogMessage.header}`,
+        subText: `${dialogMessage.message}` //,
     };
 
     const containerStackTokens: IStackTokens = { childrenGap: 20 };
 
     React.useEffect(() => {
-        //if (dummy) { return; }
+        if (dummy) { return; }
         var helper: SolutionImportHelper = new SolutionImportHelper();
         setOperationInProgresss(true);
         var deploymentId = localStorage.getItem("deploymentRecordId");
@@ -129,34 +157,72 @@ function SolutionImportWR() {
         });
     }, []);
 
+
+    React.useEffect(() => {
+
+    }, []);
+
+
     const getCredentials = () => {
         setShowCreds(false);
     }
 
+    const getDummyProgress = () => {
+        const ary: ISolutionImportProgress[] = [];
+        for (let i: number = 0; i < 30; i++) {
+            let item: ISolutionImportProgress =
+            {
+                message: "message" + i,
+                status: "status" + i,
+                solutionImportId: i.toString()
+            }
+
+            ary.push(item);
+        }
+
+        return ary;
+    }
+
+    const onViewProgress = async () => {
+        setPanelOpen();
+        timer(5000).then(() => {
+            var dummyData = getDummyProgress()
+            setSolutionImportProgress(dummyData);
+        });;
+    }
+
     const onImportClick = async () => {
+        if (dummy) { return; }
         var exportStatusRecordId = selItem.devops_exportstatusid;
         let deploymentRecordID: any = localStorage.getItem("deploymentRecordId");
         var solutionName = selItem.name;
 
         if (userid.length <= 0 || pwd.length <= 0) {
 
-            setDialogMessage('Pleaes use Authenticate button to provide credentials!!');
+            setDialogMessage({
+                header: 'Error',
+                message: 'Please use Authenticate button to provide credentials!!'
+            });
             toggleHideDialog();
             //alert('');
             return;
         }
 
         setImportInProgress(true);
-        //alert(exportStatusRecordId + deploymentRecordID + solutionName);
-        //setOperationInProgress();
         var helper = new SolutionImportHelper();
-        //var token = await authProvider.getAccessToken();
-        //alert(token.accessToken);
-        helper.triggerImport(deploymentRecordID, exportStatusRecordId, solutionName, userid, pwd, overwrite).then(resp => {
-            alert(resp);
+        helper.beginImport(deploymentRecordID, exportStatusRecordId, solutionName, userid, pwd, overwrite).then(resp => {
+            //alert(resp);
             setImportInProgress(false);
-            setDialogMessage('Your import has been triggered, you can check the progress by clicking anytime on View progress button.');
+            setDialogMessage({
+                message: resp.hasError ? resp.message : 'Your import has been triggered, you can check the progress by clicking anytime on View progress button.',
+                header: resp.hasError ? 'Error' : 'Success'
+            });
             toggleHideDialog();
+        }).catch((reason: IXrmresponse) => {
+            setDialogMessage({
+                message: reason.hasError ? reason.message : 'Your import has been triggered, you can check the progress by clicking anytime on View progress button.',
+                header: reason.hasError ? 'Error' : 'Success'
+            });
         });
 
         //alert(`the export status is ${exportStatusRecordId} and deployment record is ${deploymentRecordID}`);
@@ -203,7 +269,7 @@ function SolutionImportWR() {
         },
     ];
     return (
-        <Fabric>
+        <Fabric applyThemeToBody>
             <Stack tokens={verticalGapStackTokens} >
                 <StackItem align="stretch">
                     <Stack horizontal={true} tokens={containerStackTokens} >
@@ -212,6 +278,10 @@ function SolutionImportWR() {
                         </StackItem>
                         <StackItem>
                             <Toggle defaultChecked={overwrite} onChange={(elm, check) => { setOverWrite(); }} inlineLabel label="Override customizations" onText="Yes" offText="No" />
+                        </StackItem>
+                        <StackItem>
+                            <PrimaryButton onClick={onViewProgress}>View Progress</PrimaryButton>
+
                         </StackItem>
                     </Stack>
                 </StackItem>
@@ -226,8 +296,8 @@ function SolutionImportWR() {
                                 selection={listSelection}
                                 //onRenderItemColumn={renderItemColumn}
                                 selectionPreservedOnEmptyClick={false}
-                                //items={dummy}
-                                items={data}
+                                items={dummy}
+                                //items={data}
                                 columns={columns}
                                 setKey="set"
                                 layoutMode={DetailsListLayoutMode.justified}
@@ -253,6 +323,45 @@ function SolutionImportWR() {
                     <PrimaryButton onClick={toggleHideDialog} text="Got it!!" />
                 </DialogFooter>
             </Dialog>
+
+            <Panel isLightDismiss isOpen={pnlOpen} type={PanelType.medium} hasCloseButton
+                onDismiss={setPanelOpen}
+                closeButtonAriaLabel="Close"
+                isHiddenOnDismiss={true}
+                headerText="Import progress">
+
+                <ImportPanel/>
+                <Stack tokens={verticalGapStackTokens} >
+                    {
+                        importProgress.map(progress => {
+                            return (
+                                <StackItem styles={cardStackItemStyle} >
+                                    <Stack horizontal styles={cardStackStyle} tokens={containerStackTokens} >
+                                        <StackItem>
+                                            {progress.status}
+                                        </StackItem>
+                                        <StackItem>
+                                            <Stack>
+                                                <StackItem>
+                                                    {progress.message}
+                                                </StackItem>
+                                                <StackItem>
+                                                    {progress.message}
+                                                </StackItem>
+                                                <StackItem>
+                                                    {progress.message}
+                                                </StackItem>
+                                            </Stack>
+                                        </StackItem>
+                                    </Stack>
+                                </StackItem>
+                            );
+                        })
+                    }
+                    <StackItem>
+                    </StackItem>
+                </Stack>
+            </Panel>
         </Fabric>
     );
 }

@@ -50,7 +50,6 @@ function ImportPanel(props: any) {
 
     const containerStackTokens: IStackTokens = { childrenGap: 5, padding: 10 };
 
-
     return (
         <div>
             <Stack horizontal={true} tokens={containerStackTokens}>

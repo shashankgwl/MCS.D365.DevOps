@@ -9,9 +9,9 @@ export default class App extends Component {
 
     render() {
 
-        //return(
-        //    < SolutionImportWR />
-        //);
+        return(
+            < SolutionImportWR />
+        );
 
         if (window.location.href.includes("solutionSubGrid.html"))
             return (<SolutionGrid />);
