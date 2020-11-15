@@ -10,8 +10,16 @@ export interface IXrmresponse {
     message: string
 }
 
-export interface ISolutionImportProgress {
+export interface ISolutionImportStatus {
+    solutionName: string
     status: string
     message: string
     solutionImportId: string
+}
+
+export interface IImportProgress {
+    solutionName: string,
+    statusReason: string,
+    friendlymessage: string,
+    hasError: boolean
 }

@@ -1,15 +1,14 @@
 ﻿import * as React from 'react';
 import { DetailsList, DetailsListLayoutMode, IColumn, Selection, SelectionMode } from '../../../node_modules/office-ui-fabric-react/lib/DetailsList'
 //import AzureAD from 'react-aad-msal'
-import { IDevOpsExportStatus, ISolutionImportProgress, IXrmresponse } from '../model/SolutionImportModel'
-import { PrimaryButton, Fabric, MarqueeSelection, ProgressIndicator, Toggle } from '../../../node_modules/office-ui-fabric-react/lib'
+import { IDevOpsExportStatus, ISolutionImportStatus, IXrmresponse } from '../model/SolutionImportModel'
+import { PrimaryButton, DefaultButton, Fabric, MarqueeSelection, ProgressIndicator, Toggle } from '../../../node_modules/office-ui-fabric-react/lib'
 import { Dialog, DialogType, DialogFooter, TextField, Panel, PanelType } from '../../../node_modules/office-ui-fabric-react/lib'
 import { Stack, StackItem, IStackTokens, IStackItemStyles, IStackStyles } from '../../../node_modules/office-ui-fabric-react/lib/Stack'
 import { SolutionImportHelper } from '../ts/SolutionImportHelper'
-import { useBoolean } from '@uifabric/react-hooks'
-import { authProvider } from '../../src/js/authProvider'
-import ImportPanel from './ImportPanel';
-//import ImportPanel from '../components/ImportPanel'
+import { useBoolean, useId } from '@uifabric/react-hooks'
+//import { authProvider } from '../../src/js/authProvider'
+import ImportPanel from '../components/ImportPanel'
 function SolutionImportWR() {
     const columns: IColumn[] =
         [
@@ -79,8 +78,9 @@ function SolutionImportWR() {
     let dialogProps: IDialogProps = { header: '', message: '' };
     let curSelItem: IDevOpsExportStatus = { name: "", devops_exportstatusid: "" };
     let ab: IDevOpsExportStatus[] = [];
-    const importProgressModel: ISolutionImportProgress[] = [];
+    const importProgressModel: ISolutionImportStatus[] = [];
     const [operationInProgress, setOperationInProgresss] = React.useState(false);
+    const [panelLoadInProgress, setPanelLoadInProgress] = React.useState(false);
     const [importInProgress, setImportInProgress] = React.useState(false);
     const [showCreds, setShowCreds] = React.useState(true);
     const [selItem, setSelectedItem] = React.useState(curSelItem);
@@ -91,7 +91,7 @@ function SolutionImportWR() {
     const [overwrite, { toggle: setOverWrite }] = useBoolean(true);
     const [pnlOpen, { toggle: setPanelOpen }] = useBoolean(false);
     const [data, setData] = React.useState(ab);
-    const [importProgress, setSolutionImportProgress] = React.useState(importProgressModel);
+    const [importStatusRecords, setSolutionImportStatusRecords] = React.useState(importProgressModel);
     const timer = (ms: number) => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -100,24 +100,6 @@ function SolutionImportWR() {
         childrenGap: 10,
         padding: 10,
     };
-
-    const cardStackStyle: IStackStyles = {
-        root:
-        {
-            border: "15",
-            borderColor: "blue",
-            backgroundColor: "#c7c5c1"
-        }
-    }
-
-    const cardStackItemStyle: IStackItemStyles =
-    {
-        root:
-        {
-            height: "100%",
-            color : "white"
-        }
-    }
 
     const getText = (): string => {
         if (importInProgress)
@@ -142,7 +124,7 @@ function SolutionImportWR() {
     const containerStackTokens: IStackTokens = { childrenGap: 20 };
 
     React.useEffect(() => {
-        if (dummy) { return; }
+        //if (dummy) { return; }
         var helper: SolutionImportHelper = new SolutionImportHelper();
         setOperationInProgresss(true);
         var deploymentId = localStorage.getItem("deploymentRecordId");
@@ -167,35 +149,7 @@ function SolutionImportWR() {
         setShowCreds(false);
     }
 
-    const getDummyProgress = () => {
-        const ary: ISolutionImportProgress[] = [];
-        for (let i: number = 0; i < 30; i++) {
-            let item: ISolutionImportProgress =
-            {
-                message: "message" + i,
-                status: "status" + i,
-                solutionImportId: i.toString()
-            }
-
-            ary.push(item);
-        }
-
-        return ary;
-    }
-
-    const onViewProgress = async () => {
-        setPanelOpen();
-        timer(5000).then(() => {
-            var dummyData = getDummyProgress()
-            setSolutionImportProgress(dummyData);
-        });;
-    }
-
-    const onImportClick = async () => {
-        if (dummy) { return; }
-        var exportStatusRecordId = selItem.devops_exportstatusid;
-        let deploymentRecordID: any = localStorage.getItem("deploymentRecordId");
-        var solutionName = selItem.name;
+    const chekCredentials = () => {
 
         if (userid.length <= 0 || pwd.length <= 0) {
 
@@ -205,8 +159,90 @@ function SolutionImportWR() {
             });
             toggleHideDialog();
             //alert('');
+            return -1;
+        }
+
+        else {
+            return 0;
+        }
+    }
+
+    //const getDummyProgress = () => {
+    //    const ary: ISolutionImportStatus[] = [];
+    //    for (let i: number = 0; i < 30; i++) {
+    //        let item: ISolutionImportStatus =
+    //        {
+    //            message: "message" + i,
+    //            status: "status" + i,
+    //            solutionImportId: i.toString()
+    //        }
+
+    //        ary.push(item);
+    //    }
+
+    //    return ary;
+    //}
+
+    const onViewProgress = async () => {
+        var helper: SolutionImportHelper = new SolutionImportHelper();
+        var deploymentId = localStorage.getItem("deploymentRecordId");
+        if (chekCredentials() === -1) {
             return;
         }
+        setPanelOpen();
+        if (importStatusRecords.length <= 0) {
+            setPanelLoadInProgress(true);
+            await helper.getImportStatusOfDeployment(deploymentId).
+                then(data => {
+                    //for (let i = 0; i < 15; i++) {
+                    //    data.push({
+                    //        message: "One thing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthat handles your action and sets Output ar step that handles your action and sets Output arthat handles your action and sets Output arguments has to be registered on Post Operation (40).",
+                    //        solutionImportId: "6cb527a3-2027-eb11-a813-000d3ac04131",
+                    //        solutionName: "somefile.zip",
+                    //        status : "nice"
+                    //    })
+                    //}
+                    setSolutionImportStatusRecords(data);
+                    setPanelLoadInProgress(false);
+                }).
+                catch((error: ISolutionImportStatus[]) => {
+
+                    setDialogMessage({
+                        header: 'Error',
+                        message: error[0].message
+                    });
+                    toggleHideDialog();
+
+                })
+            //timer(5000).then(() => {
+            //    //var dummyData = getDummyProgress()
+            //    //setSolutionImportStatusRecords(dummyData);
+            //    setPanelLoadInProgress(false);
+            //});;
+        }//alert('called');
+        else
+            setPanelLoadInProgress(false);
+    }
+
+    const onImportClick = async () => {
+        //if (dummy) { return; }
+        var exportStatusRecordId = selItem.devops_exportstatusid;
+        let deploymentRecordID: any = localStorage.getItem("deploymentRecordId");
+        var solutionName = selItem.name;
+
+        if (chekCredentials() === -1) {
+            return;
+        }
+        //if (userid.length <= 0 || pwd.length <= 0) {
+
+        //    setDialogMessage({
+        //        header: 'Error',
+        //        message: 'Please use Authenticate button to provide credentials!!'
+        //    });
+        //    toggleHideDialog();
+        //    //alert('');
+        //    return;
+        //}
 
         setImportInProgress(true);
         var helper = new SolutionImportHelper();
@@ -214,15 +250,17 @@ function SolutionImportWR() {
             //alert(resp);
             setImportInProgress(false);
             setDialogMessage({
-                message: resp.hasError ? resp.message : 'Your import has been triggered, you can check the progress by clicking anytime on View progress button.',
-                header: resp.hasError ? 'Error' : 'Success'
+                message: 'Your import has been triggered, you can check the progress by clicking anytime on View progress button.',
+                header: 'Success'
             });
             toggleHideDialog();
         }).catch((reason: IXrmresponse) => {
             setDialogMessage({
-                message: reason.hasError ? reason.message : 'Your import has been triggered, you can check the progress by clicking anytime on View progress button.',
-                header: reason.hasError ? 'Error' : 'Success'
+                message: reason.message,
+                header: 'Error'
             });
+            toggleHideDialog();
+            setImportInProgress(false);
         });
 
         //alert(`the export status is ${exportStatusRecordId} and deployment record is ${deploymentRecordID}`);
@@ -296,8 +334,8 @@ function SolutionImportWR() {
                                 selection={listSelection}
                                 //onRenderItemColumn={renderItemColumn}
                                 selectionPreservedOnEmptyClick={false}
-                                items={dummy}
-                                //items={data}
+                                //items={dummy}
+                                items={data}
                                 columns={columns}
                                 setKey="set"
                                 layoutMode={DetailsListLayoutMode.justified}
@@ -327,39 +365,21 @@ function SolutionImportWR() {
             <Panel isLightDismiss isOpen={pnlOpen} type={PanelType.medium} hasCloseButton
                 onDismiss={setPanelOpen}
                 closeButtonAriaLabel="Close"
-                isHiddenOnDismiss={true}
-                headerText="Import progress">
 
-                <ImportPanel/>
+                //isHiddenOnDismiss={true}
+                headerText="Import progress">
+                <DefaultButton text="Refresh" style={{ verticalAlign: "top" }} />
+                <div style={{ display: panelLoadInProgress ? "block" : "none", width: "100%", height: "100%" }}>
+                    <ProgressIndicator label="Wait" description="Getting data from server." />
+                </div>
                 <Stack tokens={verticalGapStackTokens} >
                     {
-                        importProgress.map(progress => {
+                        importStatusRecords.map(progress => {
                             return (
-                                <StackItem styles={cardStackItemStyle} >
-                                    <Stack horizontal styles={cardStackStyle} tokens={containerStackTokens} >
-                                        <StackItem>
-                                            {progress.status}
-                                        </StackItem>
-                                        <StackItem>
-                                            <Stack>
-                                                <StackItem>
-                                                    {progress.message}
-                                                </StackItem>
-                                                <StackItem>
-                                                    {progress.message}
-                                                </StackItem>
-                                                <StackItem>
-                                                    {progress.message}
-                                                </StackItem>
-                                            </Stack>
-                                        </StackItem>
-                                    </Stack>
-                                </StackItem>
+                                <ImportPanel importStatusRecord={progress} UserId={userid} Password={pwd} />
                             );
                         })
                     }
-                    <StackItem>
-                    </StackItem>
                 </Stack>
             </Panel>
         </Fabric>
