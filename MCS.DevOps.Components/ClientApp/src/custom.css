@@ -12,6 +12,7 @@ code {
     transition: 0.3s;
     width: 100%;
     border-radius: 5px;
+    border-bottom-width:thin
 }
 
     .card:hover {

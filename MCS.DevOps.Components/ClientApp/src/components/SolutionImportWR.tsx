@@ -1,8 +1,10 @@
 ﻿import * as React from 'react';
 import { DetailsList, DetailsListLayoutMode, IColumn, Selection, SelectionMode } from '../../../node_modules/office-ui-fabric-react/lib/DetailsList'
+import { initializeIcons } from '@uifabric/icons';
+
 //import AzureAD from 'react-aad-msal'
 import { IDevOpsExportStatus, ISolutionImportStatus, IXrmresponse } from '../model/SolutionImportModel'
-import { PrimaryButton, DefaultButton, Fabric, MarqueeSelection, ProgressIndicator, Toggle } from '../../../node_modules/office-ui-fabric-react/lib'
+import { PrimaryButton, IconButton, Fabric, MarqueeSelection, ProgressIndicator, Toggle } from '../../../node_modules/office-ui-fabric-react/lib'
 import { Dialog, DialogType, DialogFooter, TextField, Panel, PanelType } from '../../../node_modules/office-ui-fabric-react/lib'
 import { Stack, StackItem, IStackTokens, IStackItemStyles, IStackStyles } from '../../../node_modules/office-ui-fabric-react/lib/Stack'
 import { SolutionImportHelper } from '../ts/SolutionImportHelper'
@@ -48,7 +50,7 @@ function SolutionImportWR() {
             //    key: "chkprogress",
             //    minWidth: 150,
             //    name: "View progress",
-            //    isResizable: true,
+            //    isResizable: tru0e,
             //    isCollapsible: true,
             //    data: 'string',
             //    onRender: item => {
@@ -115,6 +117,13 @@ function SolutionImportWR() {
         subText: 'Please enter a valid CDS username and password.',
     };
 
+    const getUrlParameter = (name: string) => {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(window.location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
+
     const successdialogContentProps = {
         type: DialogType.normal,
         title: `${dialogMessage.header}`,
@@ -123,12 +132,13 @@ function SolutionImportWR() {
 
     const containerStackTokens: IStackTokens = { childrenGap: 20 };
 
-    React.useEffect(() => {
-        //if (dummy) { return; }
+    const getExportStatus = () => {
         var helper: SolutionImportHelper = new SolutionImportHelper();
         setOperationInProgresss(true);
-        var deploymentId = localStorage.getItem("deploymentRecordId");
-        helper.getExportStatusOfDeployment(deploymentId).then(result => {
+        console.log(getUrlParameter("id"));
+        //var deploymentId = localStorage.getItem("deploymentRecordId");
+        //alert(deploymentId);
+        helper.getExportStatusOfDeployment(getUrlParameter("id")).then(result => {
             let exportRecords: IDevOpsExportStatus[] = [];
             result.entities.map(exportRecord => {
                 exportRecords.push({ name: exportRecord.devops_name, devops_exportstatusid: exportRecord.devops_exportstatusid });
@@ -137,11 +147,12 @@ function SolutionImportWR() {
             setData(exportRecords);
             setOperationInProgresss(false);
         });
-    }, []);
-
+    }
 
     React.useEffect(() => {
-
+        initializeIcons();
+        //if (dummy) { return; }
+        getExportStatus();
     }, []);
 
 
@@ -185,68 +196,50 @@ function SolutionImportWR() {
 
     const onViewProgress = async () => {
         var helper: SolutionImportHelper = new SolutionImportHelper();
-        var deploymentId = localStorage.getItem("deploymentRecordId");
+        var deploymentId = getUrlParameter("id"); // localStorage.getItem("deploymentRecordId");
+        console.log(`The deployment id is ${deploymentId}`);
         if (chekCredentials() === -1) {
             return;
         }
         setPanelOpen();
-        if (importStatusRecords.length <= 0) {
-            setPanelLoadInProgress(true);
-            await helper.getImportStatusOfDeployment(deploymentId).
-                then(data => {
-                    //for (let i = 0; i < 15; i++) {
-                    //    data.push({
-                    //        message: "One thing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthaing you should remember is thatthat handles your action and sets Output ar step that handles your action and sets Output arthat handles your action and sets Output arguments has to be registered on Post Operation (40).",
-                    //        solutionImportId: "6cb527a3-2027-eb11-a813-000d3ac04131",
-                    //        solutionName: "somefile.zip",
-                    //        status : "nice"
-                    //    })
-                    //}
-                    setSolutionImportStatusRecords(data);
-                    setPanelLoadInProgress(false);
-                }).
-                catch((error: ISolutionImportStatus[]) => {
+        //if (importStatusRecords.length <= 0) {
+        setPanelLoadInProgress(true);
+        await helper.getImportStatusOfDeployment(deploymentId).
+            then(data => {
+                setSolutionImportStatusRecords(data);
+                setPanelLoadInProgress(false);
+            }).
+            catch((error: ISolutionImportStatus[]) => {
 
-                    setDialogMessage({
-                        header: 'Error',
-                        message: error[0].message
-                    });
-                    toggleHideDialog();
+                setDialogMessage({
+                    header: 'Error',
+                    message: error[0].message ?? ''
+                });
+                toggleHideDialog();
 
-                })
-            //timer(5000).then(() => {
-            //    //var dummyData = getDummyProgress()
-            //    //setSolutionImportStatusRecords(dummyData);
-            //    setPanelLoadInProgress(false);
-            //});;
-        }//alert('called');
-        else
-            setPanelLoadInProgress(false);
+            })
+        //timer(5000).then(() => {
+        //    //var dummyData = getDummyProgress()
+        //    //setSolutionImportStatusRecords(dummyData);
+        //    setPanelLoadInProgress(false);
+        //});;
+        //}//alert('called');
+        //else
+        //    setPanelLoadInProgress(false);
     }
 
     const onImportClick = async () => {
         //if (dummy) { return; }
         var exportStatusRecordId = selItem.devops_exportstatusid;
-        let deploymentRecordID: any = localStorage.getItem("deploymentRecordId");
+        let deploymentRecordID: any = getUrlParameter("id");// localStorage.getItem("deploymentRecordId");
         var solutionName = selItem.name;
 
         if (chekCredentials() === -1) {
             return;
         }
-        //if (userid.length <= 0 || pwd.length <= 0) {
-
-        //    setDialogMessage({
-        //        header: 'Error',
-        //        message: 'Please use Authenticate button to provide credentials!!'
-        //    });
-        //    toggleHideDialog();
-        //    //alert('');
-        //    return;
-        //}
-
         setImportInProgress(true);
         var helper = new SolutionImportHelper();
-        helper.beginImport(deploymentRecordID, exportStatusRecordId, solutionName, userid, pwd, overwrite).then(resp => {
+        helper.importSolution(deploymentRecordID, exportStatusRecordId, solutionName, userid, pwd, overwrite).then(resp => {
             //alert(resp);
             setImportInProgress(false);
             setDialogMessage({
@@ -319,7 +312,10 @@ function SolutionImportWR() {
                         </StackItem>
                         <StackItem>
                             <PrimaryButton onClick={onViewProgress}>View Progress</PrimaryButton>
+                        </StackItem>
 
+                        <StackItem>
+                            <IconButton iconProps={{ iconName: "Refresh" }} title="Refresh grid" onClick={getExportStatus} />
                         </StackItem>
                     </Stack>
                 </StackItem>
@@ -368,7 +364,6 @@ function SolutionImportWR() {
 
                 //isHiddenOnDismiss={true}
                 headerText="Import progress">
-                <DefaultButton text="Refresh" style={{ verticalAlign: "top" }} />
                 <div style={{ display: panelLoadInProgress ? "block" : "none", width: "100%", height: "100%" }}>
                     <ProgressIndicator label="Wait" description="Getting data from server." />
                 </div>

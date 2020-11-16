@@ -25,9 +25,7 @@ export class SolutionImportHelper {
             for (var i = 0; i < data.entities.length; i++) {
                 records.push({
                     solutionName: data.entities[i]["devops_name"],
-                    solutionImportId: data.entities[i]["devops_importid"],
-                    message: '',
-                    status: ''
+                    solutionImportId: data.entities[i]["devops_importid"]
                 });
             }
             return new Promise<ISolutionImportStatus[]>(resolve => resolve(records));
@@ -91,6 +89,7 @@ export class SolutionImportHelper {
         try {
             var output = await window.parent.Xrm.WebApi.online.execute(devops_executeImportStatusRequest);
             var result = JSON.parse(JSON.parse(await output.text()).ResultJSON);
+            console.log(`The value of result in method getImportProgressOnServer is ${result}`);
             return new Promise<IImportProgress>(async (resolve) => {
                 resolve(
                     {
@@ -114,7 +113,7 @@ export class SolutionImportHelper {
     }
 
 
-    async beginImport(deploymentId: string, exportStatusRecId: string, solutionName: string, username: string, password: string, overwrite: boolean): Promise<IXrmresponse> {
+    async importSolution(deploymentId: string, exportStatusRecId: string, solutionName: string, username: string, password: string, overwrite: boolean): Promise<IXrmresponse> {
         //alert(`overwrite is ${overwrite}`);
         var devops_executeImportRequest = {
             deploymentId: deploymentId,
@@ -159,7 +158,6 @@ export class SolutionImportHelper {
         };
 
         try {
-            var output = await window.parent.Xrm.WebApi.online.execute(devops_executeImportRequest);
             return new Promise(resolve => {
                 resolve({ hasError: false, message: "Operation completed successfully." });
             });

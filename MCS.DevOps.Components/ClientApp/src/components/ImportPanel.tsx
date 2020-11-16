@@ -1,16 +1,17 @@
 ﻿import * as React from 'react';
 import '../../src/custom.css'
-import { Panel, Fabric, DialogType, Stack, IStackTokens, DialogFooter, ProgressIndicator } from '../../../node_modules/office-ui-fabric-react/lib'
+import { Fabric, DialogType, IStackTokens, ProgressIndicator } from '../../../node_modules/office-ui-fabric-react/lib'
 import { SolutionImportHelper } from '../ts/SolutionImportHelper'
 import { useBoolean } from '@uifabric/react-hooks'
-import { ISolutionImportStatus, IXrmresponse, IImportProgress } from '../model/SolutionImportModel';
+import { ISolutionImportStatus, IImportProgress } from '../model/SolutionImportModel';
 
 function ImportPanel(props: any) {
 
-    const successdialogContentProps = {
-        type: DialogType.normal,
-        title: 'Success',
-        subText: 'Your import has been triggered, you can check the progress by clicking anytime on View progress button.',
+    const getUrlParameter = (name: string) => {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(window.location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     };
 
     const progressObject: IImportProgress = {
@@ -22,14 +23,12 @@ function ImportPanel(props: any) {
 
 
 
-    //const [hideDialog, { toggle: toggleHideDialog }] = useBoolean(true);
-    //const [isPanelOpen, { setTrue: showPanel, setFalse: hidePanel }] = useBoolean(false);
     const [isOperationInProgress, { setTrue: setOperationInProgress, setFalse: resetOperationInProgress }] = useBoolean(false);
     const [progressStatement, setProgressStatement] = React.useState(progressObject);
     React.useEffect(() => {
         var thisImportStatus = props.importStatusRecord as ISolutionImportStatus;
         var asyncImportId = thisImportStatus.solutionImportId;
-        var deploymentId: any = localStorage.getItem("deploymentRecordId");
+        var deploymentId: any = getUrlParameter("id"); //localStorage.getItem("deploymentRecordId");
         var usrName = props.UserId;
         var pswd = props.Password;
         setOperationInProgress();
@@ -57,20 +56,6 @@ function ImportPanel(props: any) {
 
     }, [props.importStatusRecord, props.Password, props.UserId]);
 
-    const onViewProgressClick = () => {
-        //showPanel();
-    }
-
-
-
-    const getText = (): string => {
-        if (isOperationInProgress)
-            return "Please wait.";
-        else
-            return "Click to import";
-    }
-
-    const containerStackTokens: IStackTokens = { childrenGap: 5, padding: 10 };
 
     return (<Fabric>
         <div className="card">

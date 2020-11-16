@@ -12,8 +12,8 @@ export interface IXrmresponse {
 
 export interface ISolutionImportStatus {
     solutionName: string
-    status: string
-    message: string
+    status?: string
+    message?: string
     solutionImportId: string
 }
 

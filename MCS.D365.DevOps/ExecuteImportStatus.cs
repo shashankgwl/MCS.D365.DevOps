@@ -52,8 +52,17 @@ namespace MCS.PSA.DevOps.Plugins
             this.UserName = context.InputParameters["UN"].ToString();
             this.Password = context.InputParameters["PW"].ToString();
             Entity asyncOperation = GetAsyncOperationStatus(this.ImportAsyncID, tracingService, context, targetOrgCredentials);
+            //throw new InvalidPluginExecutionException("Kya faltu giri hai");
+            if(asyncOperation.Contains("friendlymessage"))
+            {
+                context.OutputParameters["ResultJSON"] = $" {{\"message\" : \"{asyncOperation["friendlymessage"]}\" ,\"status\" : \"{asyncOperation.FormattedValues["statuscode"]}\"}}";
+            }
 
-            context.OutputParameters["ResultJSON"] = $" {{\"message\" : \"{asyncOperation["friendlymessage"]}\" ,\"status\" : \"{asyncOperation.FormattedValues["statuscode"]}\"}}";
+            else
+            {
+                context.OutputParameters["ResultJSON"] = $" {{\"message\" : \"{asyncOperation.FormattedValues["statuscode"]}\" ,\"status\" : \"{asyncOperation.FormattedValues["statuscode"]}\"}}";
+            }
+
             //if (asyncOperation.Contains("data"))
             //{
             //    context.OutputParameters["Result"] = $"{{ data : {asyncOperation["data"]} , message : {asyncOperation["friendlymessage"]}";
