@@ -30,14 +30,7 @@ namespace MCS.PSA.DevOps.Plugins
 
             tracingService.Trace($"ExecuteImportStatus started...");
 
-            ////Entity deployment = null;
-            ////Guid recordID = Guid.Empty;
-            ////if (context.InputParameters.Contains("RecordId"))
-            ////{
-            ////    recordID = Guid.Parse(context.InputParameters["RecordId"].ToString());
-            ////    ColumnSet cols = new ColumnSet("devops_importid");
-            ////    deployment = (Entity)service.Retrieve("devops_deployment", recordID, cols);
-            ////}
+            
 
             ////Guid importId = Guid.Parse(deployment["devops_importid"].ToString());
             ////tracingService.Trace($"Import ID retrieved is {importId}.");
@@ -52,7 +45,6 @@ namespace MCS.PSA.DevOps.Plugins
             this.UserName = context.InputParameters["UN"].ToString();
             this.Password = context.InputParameters["PW"].ToString();
             Entity asyncOperation = GetAsyncOperationStatus(this.ImportAsyncID, tracingService, context, targetOrgCredentials);
-            //throw new InvalidPluginExecutionException("Kya faltu giri hai");
             if(asyncOperation.Contains("friendlymessage"))
             {
                 context.OutputParameters["ResultJSON"] = $" {{\"message\" : \"{asyncOperation["friendlymessage"]}\" ,\"status\" : \"{asyncOperation.FormattedValues["statuscode"]}\"}}";
@@ -63,30 +55,7 @@ namespace MCS.PSA.DevOps.Plugins
                 context.OutputParameters["ResultJSON"] = $" {{\"message\" : \"{asyncOperation.FormattedValues["statuscode"]}\" ,\"status\" : \"{asyncOperation.FormattedValues["statuscode"]}\"}}";
             }
 
-            //if (asyncOperation.Contains("data"))
-            //{
-            //    context.OutputParameters["Result"] = $"{{ data : {asyncOperation["data"]} , message : {asyncOperation["friendlymessage"]}";
-            //}
-            //else
-            //{
-            //    context.OutputParameters["Result"] = $"{{ message : {asyncOperation["friendlymessage"]}";
-            //}
-            ////OptionSetValue status = (OptionSetValue)asyncOperation["statuscode"];
-            ////if (status.Value == 30)
-            ////{
-            ////    tracingService.Trace($"Status is {status.Value}.");
-            ////    //tracingService.Trace($"Error Message is {(string)asyncOperation["friendlymessage"]}.");
-            ////    CreateSuccessImportStatusRecord(status.Value, (string)context.InputParameters["SolutionName"],
-            ////                        Guid.Parse(context.InputParameters["RecordId"].ToString()), service, tracingService);
-            ////}
-            ////////if (status.Value == 30 || status.Value == 31 || status.Value == 32)
-            ////if (status.Value == 31 || status.Value == 32)
-            ////{
-            ////    tracingService.Trace($"Status is {status.Value}.");
-            ////    //tracingService.Trace($"Error Message is {(string)asyncOperation["friendlymessage"]}.");
-            ////    CreateImportStatusRecord(status.Value, (string)context.InputParameters["SolutionName"], (string)asyncOperation["friendlymessage"],
-            ////                        Guid.Parse(context.InputParameters["RecordId"].ToString()), service, tracingService);
-            ////}
+            
 
         }
 
@@ -130,39 +99,6 @@ namespace MCS.PSA.DevOps.Plugins
             return asyncOperation;
         }
 
-        private static void CreateImportStatusRecord(int status, string solutionName, string error, Guid deploymentId, IOrganizationService service, ITracingService tracingService)
-        {
-            int maxLength = 99999;
-            tracingService.Trace($"Creating Import Status record");
-            Entity importstatus = new Entity("devops_importstatus");
-            importstatus["devops_name"] = solutionName;
-            importstatus["devops_deployment"] = new EntityReference("devops_deployment", deploymentId);
-            if (status == 30)
-            {
-                importstatus["devops_status"] = "Succeeded";
-            }
-            else
-            {
-                importstatus["devops_status"] = "Failed";
-                importstatus["devops_errordetails"] = error.Substring(0, Math.Min(error.Length, maxLength)); ;////error.Substring(0, Math.Min(error.Length, maxLength)); //restrict the error to first 100k characters
-            }
-            service.Create(importstatus);
-            tracingService.Trace($"Import Status record created.");
-        }
-        private static void CreateSuccessImportStatusRecord(int status, string solutionName, Guid deploymentId, IOrganizationService service, ITracingService tracingService)
-        {
-            tracingService.Trace($"Creating Import Status record");
-            Entity importstatus = new Entity("devops_importstatus");
-            importstatus["devops_name"] = solutionName;
-            importstatus["devops_deployment"] = new EntityReference("devops_deployment", deploymentId);
-            if (status == 30)
-            {
-                importstatus["devops_status"] = "Succeeded";
-            }
-            service.Create(importstatus);
-            tracingService.Trace($"Import Status record created.");
-        }
-
         private static EntityCollection GetTargetOrgCredentials(Guid deploymentId, IOrganizationService service)
         {
             string fetchXml = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
@@ -181,6 +117,5 @@ namespace MCS.PSA.DevOps.Plugins
             return entityCollection;
 
         }
-
     }
 }

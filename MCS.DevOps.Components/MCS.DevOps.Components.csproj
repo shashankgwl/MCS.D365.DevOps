@@ -54,6 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Remove="ClientApp\src\components\AuthCheck.tsx" />
     <TypeScriptCompile Remove="ClientApp\src\ts\OmniChannel.ts" />
     <TypeScriptCompile Remove="ClientApp\src\ts\SolutionGridXrm.ts" />
   </ItemGroup>
