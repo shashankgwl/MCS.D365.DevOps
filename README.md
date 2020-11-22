@@ -7,8 +7,12 @@ This dynamics solution allows you to deploy dynamics solutions from within dynam
 - Import devops candy solution.  
 - Create records for defining organizations. (you need to provide Org Servie svc URL.
  - Create deployment record and provide details like target organization, export type.
-  
 
+
+# download
+
+ - go to the download folder to download the latest solutions (unmanaged/managed)
+ 
 # Coming Soon
 
   - OAuth support.
