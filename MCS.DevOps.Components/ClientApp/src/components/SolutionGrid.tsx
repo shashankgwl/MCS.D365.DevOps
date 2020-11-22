@@ -3,10 +3,13 @@ import { DialogType, } from 'office-ui-fabric-react/lib/'// '../../../node_modul
 import * as React from 'react';
 import { IStackStyles } from 'office-ui-fabric-react/lib/Stack';
 import { DefaultPalette } from 'office-ui-fabric-react/lib/Styling';
-import { Fabric, PrimaryButton, ProgressIndicator, Label, Stack, TooltipHost } from 'office-ui-fabric-react/lib/' // '../../../node_modules/office-ui-fabric-react/lib/';
+import { Fabric, PrimaryButton, ActionButton, ProgressIndicator, Label, Stack, TooltipHost } from 'office-ui-fabric-react/lib/' // '../../../node_modules/office-ui-fabric-react/lib/';
 import { DetailsList, DetailsListLayoutMode, IColumn, SelectionMode } from 'office-ui-fabric-react/lib/'// '../../../node_modules/office-ui-fabric-react/lib/DetailsList'
 import * as SolutionHelper from '../ts/SolutionGridXrm'
+import SolutionButton from './CreateSolutionButton'
 import { ISolution } from '../model/models'
+import { initializeIcons } from '@uifabric/icons';
+import { Button } from 'reactstrap';
 const timeout = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -62,23 +65,23 @@ function SolutionGrid() {
 
     const columns: IColumn[] =
         [
-            {
-                key: "friendlyname",
-                minWidth: 150,
-                name: "Solution Name",
-                isResizable: true,
-                isCollapsible: true,
-                data: 'string',
+            //{
+            //    key: "friendlyname",
+            //    minWidth: 150,
+            //    name: "Solution Name",
+            //    isResizable: true,
+            //    isCollapsible: true,
+            //    data: 'string',
 
-                onRender: (item: ISolution) => {
-                    return <Label>{item.friendlyname}</Label>;
-                }
-            },
+            //    onRender: (item: ISolution) => {
+            //        return <Label>{item.friendlyname}</Label>;
+            //    }
+            //},
 
             {
                 key: "uniquename",
                 minWidth: 150,
-                name: "Solution Unique Name",
+                name: "Solution Name",
 
                 isResizable: true,
                 isCollapsible: true,
@@ -99,6 +102,19 @@ function SolutionGrid() {
                 onRender: (item: ISolution) => {
                     return <Label>{item.version}</Label>;
                 }
+            },
+
+            {
+                key: "importThis",
+                minWidth: 150,
+                name: "Action",
+
+                isResizable: true,
+                isCollapsible: true,
+                data: 'string',
+                onRender: (item: ISolution) => {
+                    return <SolutionButton solutionItem={item} />;
+                }
             }
         ]
 
@@ -113,9 +129,12 @@ function SolutionGrid() {
     ////const [hideDialog, { toggle: toggleHideDialog }] = React.useBoolean(false);
     //const []=useBoolean(false);
 
+
+
     React.useEffect(() => {
         //var bb = getDummyData();
         //setData(bb)
+        initializeIcons();
         //setOperationInProgress(false);
         if (data.length > 0) {
             console.log("data already exists, skipping server call.");
@@ -148,7 +167,7 @@ function SolutionGrid() {
             <Stack horizontal={false} styles={stackStyles}>
                 <Stack.Item align="end">
                     <TooltipHost content="click this button to create solution records. should be done only once.">
-                        <PrimaryButton style={{ marginTop: 5 }} disabled={opeationInPrgoress} text="import solution records." onClick={clickNow} />
+                        <PrimaryButton style={{ marginTop: 5 }} disabled={opeationInPrgoress} text="Import all." onClick={clickNow} />
                     </TooltipHost>
                 </Stack.Item>
                 <Stack.Item>

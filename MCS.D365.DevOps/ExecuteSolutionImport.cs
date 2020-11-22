@@ -41,9 +41,14 @@ namespace MCS.PSA.DevOps.Plugins
             var userName = context.InputParameters["UN"].ToString();
             var password = context.InputParameters["PW"].ToString();
             this.OverWrite = bool.Parse(context.InputParameters["Overwrite"].ToString());
+            tracingService.Trace($"Now Calling GetTargetOrgCredentials");
             var targetOrgCredentials = GetTargetOrgCredentials(deploymentId, service);
+            tracingService.Trace($"done calling GetTargetOrgCredentials");
+            tracingService.Trace($"Now Calling GetAnnotation");
             var note = GetAnnotation(service, exportStatusRecord);
+            tracingService.Trace($"Done Calling GetAnnotation");
             fileContent = Convert.FromBase64String(note.Entities[0].GetAttributeValue<string>("documentbody"));
+            tracingService.Trace($"Now calling ImportSolutionInTargetOrg");
             var asyncOperationId = ImportSolutionInTargetOrg(tracingService, fileContent, targetOrgCredentials, userName, password);
             CreateImportRecord(service, deploymentId, asyncOperationId, solutionName);
 
@@ -129,7 +134,8 @@ namespace MCS.PSA.DevOps.Plugins
             clientCredentials.UserName.Password = password;
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            targetOrganizationService = (IOrganizationService)new OrganizationServiceProxy(new Uri(orgSvcUrl),
+            tracingService.Trace($"Trying to create new OrganizationServiceProxy");
+            targetOrganizationService = new OrganizationServiceProxy(new Uri(orgSvcUrl),
              null, clientCredentials, null);
 
             if (targetOrganizationService != null)

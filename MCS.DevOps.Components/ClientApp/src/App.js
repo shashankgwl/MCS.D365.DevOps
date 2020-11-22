@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import SolutionGrid from './components/SolutionGrid'
 import SolutionImportWR from '../src/components/SolutionImportWR'
-import AuthCheck from '../src/components/AuthCheck'
 import './custom.css'
 
 export default class App extends Component {
@@ -9,8 +8,8 @@ export default class App extends Component {
 
     render() {
 
-        //return(
-        //    < SolutionImportWR />
+        //return (
+        //    < CreateSolutionButton />
         //);
 
         if (window.location.href.includes("solutionSubGrid.html"))
@@ -18,6 +17,6 @@ export default class App extends Component {
         else if (window.location.href.includes("solutionImportWR.htm"))
             return (<SolutionImportWR />)
         else
-            return (<AuthCheck />)
+            return (<h1>unknown COMPONENT</h1>)
     }
 }

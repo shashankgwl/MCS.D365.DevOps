@@ -1,7 +1,8 @@
 ﻿/// <reference path="../../../node_modules/@types/xrm/index.d.ts" />
 
 import { AuthenticationState } from "react-aad-msal";
-import { ISolutionImportStatus, IImportProgress, IXrmresponse } from '../model/SolutionImportModel'
+import { ISolutionImportStatus, IImportProgress, IXrmresponse, IDevOpsExportStatus } from '../model/SolutionImportModel'
+import { IDevopsSolution, ISolution } from '../model/models'
 
 
 export class SolutionImportHelper {
@@ -9,18 +10,59 @@ export class SolutionImportHelper {
     constructor() {
     }
 
-    async getExportStatusOfDeployment(deploymentId?: string | null): Promise<Xrm.RetrieveMultipleResult> {
+    async createSolutionRecord(solution: ISolution) {
 
-        return new Promise((resolve, reject) => {
-            window.parent.Xrm.WebApi.online.retrieveMultipleRecords("devops_exportstatus", `?$select=devops_name&$filter=_devops_deployment_value eq ${deploymentId}`).
-                then(data => resolve(data)).catch(reason => reject(reason));
+        var devopsSol: IDevopsSolution = {
+            devops_name: solution.uniquename,
+            devops_solutionuniquename: solution.uniquename,
+            devops_version: solution.version
+        }
+        window.parent.Xrm.WebApi.online.createRecord("devops_solution", devopsSol).then(
+            function success(result) {
+                var newEntityId = result.id;
+            },
+            function (error) {
+            }
+        );
+    }
+
+    getDynamicsVersion = () => {
+        return window.parent.Xrm.Utility.getGlobalContext().getVersion();
+    }
+
+    async getExportStatusOfDeployment(deploymentId?: string | null): Promise<IDevOpsExportStatus[]> {
+
+        return new Promise(async (resolve, reject) => {
+            let filter: string = '';
+            if (this.getDynamicsVersion().startsWith("9.1"))
+                filter = `?$select=devops_name&$filter=_devops_deployment_value eq ${deploymentId}`;
+            else
+                filter = `?$select=devops_name&$filter=_devops_deployment_value eq ${deploymentId?.replace(/[{}]/g, "")}`;
+
+            var output = await window.parent.Xrm.WebApi.online.retrieveMultipleRecords("devops_exportstatus", filter);
+            var result: IDevOpsExportStatus[] = [];
+            output.entities.map(item => {
+                console.log("id = " + item.devops_exportstatusid)
+                console.log("name = " + item.devops_names)
+                result.push({
+                    devops_exportstatusid: item.devops_exportstatusid,
+                    name: item.devops_name
+                });
+            });
+
+            resolve(result);
+            //then(data => resolve(data)).catch(reason => reject(reason));
+
         });
     }
+
+
 
     async getImportStatusOfDeployment(deploymentId?: string | null): Promise<ISolutionImportStatus[]> {
         var records: ISolutionImportStatus[] = [];
         try {
-            var data = await window.parent.Xrm.WebApi.online.retrieveMultipleRecords("devops_importstatus", `?$select=devops_importid,devops_name&$filter=_devops_deployment_value eq ${deploymentId}&$orderby=createdon desc`);
+
+            var data = await window.parent.Xrm.WebApi.online.retrieveMultipleRecords("devops_importstatus", `?$select=devops_importid,devops_name&$filter=_devops_deployment_value eq ${deploymentId?.replace(/[{}]/g, "")}&$orderby=createdon desc`);
 
             for (var i = 0; i < data.entities.length; i++) {
                 records.push({
@@ -89,7 +131,10 @@ export class SolutionImportHelper {
         try {
             var output = await window.parent.Xrm.WebApi.online.execute(devops_executeImportStatusRequest);
             var result = JSON.parse(JSON.parse(await output.text()).ResultJSON);
-            console.log(`The value of result in method getImportProgressOnServer is ${result}`);
+            if (result === null || result === undefined) {
+                throw new Error('Null received from server for devops_executeImportStatusRequest');
+            }
+            console.dir(result);
             return new Promise<IImportProgress>(async (resolve) => {
                 resolve(
                     {
@@ -158,6 +203,8 @@ export class SolutionImportHelper {
         };
 
         try {
+            var output = await window.parent.Xrm.WebApi.online.execute(devops_executeImportRequest);
+            //alert(output.status);
             return new Promise(resolve => {
                 resolve({ hasError: false, message: "Operation completed successfully." });
             });

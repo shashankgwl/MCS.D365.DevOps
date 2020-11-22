@@ -37,6 +37,7 @@
   <ItemGroup>
     <None Remove="ClientApp\src\components\AuthCheck.tsx" />
     <None Remove="ClientApp\src\components\Counter.js" />
+    <None Remove="ClientApp\src\components\CreateSolutionButton.tsx" />
     <None Remove="ClientApp\src\components\FetchData.js" />
     <None Remove="ClientApp\src\components\Home.js" />
     <None Remove="ClientApp\src\components\ImportPanel.tsx" />
@@ -48,6 +49,7 @@
     <None Remove="ClientApp\src\model\models.ts" />
     <None Remove="ClientApp\src\model\SolutionImportModel.ts" />
     <None Remove="ClientApp\src\ts\OmniChannel.ts" />
+    <None Remove="ClientApp\src\ts\SolutionGridXrmV8.ts" />
     <None Remove="ClientApp\src\ts\SolutionImportHelper.ts" />
   </ItemGroup>
 

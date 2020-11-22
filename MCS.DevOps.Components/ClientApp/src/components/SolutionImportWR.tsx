@@ -6,16 +6,16 @@ import { initializeIcons } from '@uifabric/icons';
 import { IDevOpsExportStatus, ISolutionImportStatus, IXrmresponse } from '../model/SolutionImportModel'
 import { PrimaryButton, IconButton, Fabric, MarqueeSelection, ProgressIndicator, Toggle } from '../../../node_modules/office-ui-fabric-react/lib'
 import { Dialog, DialogType, DialogFooter, TextField, Panel, PanelType } from '../../../node_modules/office-ui-fabric-react/lib'
-import { Stack, StackItem, IStackTokens, IStackItemStyles, IStackStyles } from '../../../node_modules/office-ui-fabric-react/lib/Stack'
+import { Stack, StackItem, IStackTokens } from '../../../node_modules/office-ui-fabric-react/lib/Stack'
 import { SolutionImportHelper } from '../ts/SolutionImportHelper'
-import { useBoolean, useId } from '@uifabric/react-hooks'
+import { useBoolean } from '@uifabric/react-hooks'
 //import { authProvider } from '../../src/js/authProvider'
 import ImportPanel from '../components/ImportPanel'
 function SolutionImportWR() {
     const columns: IColumn[] =
         [
             {
-                key: "solutionname",
+                key: "name",
                 minWidth: 150,
                 name: "Solution Name",
                 isResizable: true,
@@ -35,6 +35,7 @@ function SolutionImportWR() {
                 data: 'string',
                 onRender: (item: IDevOpsExportStatus) => {
                     return (<PrimaryButton
+                        color="white"
                         disabled={importInProgress}
                         text={getText()}
                         onClick={onImportClick}
@@ -46,17 +47,6 @@ function SolutionImportWR() {
                 }
             },
 
-            //{
-            //    key: "chkprogress",
-            //    minWidth: 150,
-            //    name: "View progress",
-            //    isResizable: tru0e,
-            //    isCollapsible: true,
-            //    data: 'string',
-            //    onRender: item => {
-            //        return (<ImportButton text="View Progress" />);
-            //    }
-            //}
         ]
 
     const getVisibility = () => {
@@ -139,12 +129,7 @@ function SolutionImportWR() {
         //var deploymentId = localStorage.getItem("deploymentRecordId");
         //alert(deploymentId);
         helper.getExportStatusOfDeployment(getUrlParameter("id")).then(result => {
-            let exportRecords: IDevOpsExportStatus[] = [];
-            result.entities.map(exportRecord => {
-                exportRecords.push({ name: exportRecord.devops_name, devops_exportstatusid: exportRecord.devops_exportstatusid });
-            });
-
-            setData(exportRecords);
+            setData(result);
             setOperationInProgresss(false);
         });
     }
@@ -231,7 +216,7 @@ function SolutionImportWR() {
     const onImportClick = async () => {
         //if (dummy) { return; }
         var exportStatusRecordId = selItem.devops_exportstatusid;
-        let deploymentRecordID: any = getUrlParameter("id");// localStorage.getItem("deploymentRecordId");
+        let deploymentRecordID: string = getUrlParameter("id");// localStorage.getItem("deploymentRecordId");
         var solutionName = selItem.name;
 
         if (chekCredentials() === -1) {
@@ -278,6 +263,51 @@ function SolutionImportWR() {
             setSelectedItem(listSelection.getSelection()[0] as IDevOpsExportStatus)
         },
     });
+
+    const PanelDefinition = () => {
+        if (importStatusRecords.length > 0) {
+            return (
+                <Panel isLightDismiss isOpen={pnlOpen} type={PanelType.medium} hasCloseButton
+                    onDismiss={setPanelOpen}
+                    closeButtonAriaLabel="Close"
+
+                    //isHiddenOnDismiss={true}
+                    headerText="Import progress">
+                    <div style={{ display: panelLoadInProgress ? "block" : "none", width: "100%", height: "100%" }}>
+                        <ProgressIndicator label="Wait" description="Getting data from server." />
+                    </div>
+                    <Stack tokens={verticalGapStackTokens} >
+                        {
+                            importStatusRecords.map(progress => {
+                                return (
+                                    <ImportPanel importStatusRecord={progress} UserId={userid} Password={pwd} />
+                                );
+                            })
+                        }
+                    </Stack>
+                </Panel>
+            );
+        }
+
+        else
+            return (
+                <Panel isLightDismiss isOpen={pnlOpen} type={PanelType.medium} hasCloseButton
+                    onDismiss={setPanelOpen}
+                    closeButtonAriaLabel="Close"
+
+                    //isHiddenOnDismiss={true}
+                    headerText="Import progress">
+                    <div style={{ display: panelLoadInProgress ? "block" : "none", width: "100%", height: "100%" }}>
+                        <ProgressIndicator label="Wait" description="Getting data from server." />
+                    </div>
+                    <Stack tokens={verticalGapStackTokens} >
+                        <StackItem>
+                            <h2>No Import Records were found. Did you import?</h2>
+                        </StackItem>
+                    </Stack>
+                </Panel>
+            )
+    }
 
 
     var dummy: IDevOpsExportStatus[] = [
@@ -357,26 +387,7 @@ function SolutionImportWR() {
                     <PrimaryButton onClick={toggleHideDialog} text="Got it!!" />
                 </DialogFooter>
             </Dialog>
-
-            <Panel isLightDismiss isOpen={pnlOpen} type={PanelType.medium} hasCloseButton
-                onDismiss={setPanelOpen}
-                closeButtonAriaLabel="Close"
-
-                //isHiddenOnDismiss={true}
-                headerText="Import progress">
-                <div style={{ display: panelLoadInProgress ? "block" : "none", width: "100%", height: "100%" }}>
-                    <ProgressIndicator label="Wait" description="Getting data from server." />
-                </div>
-                <Stack tokens={verticalGapStackTokens} >
-                    {
-                        importStatusRecords.map(progress => {
-                            return (
-                                <ImportPanel importStatusRecord={progress} UserId={userid} Password={pwd} />
-                            );
-                        })
-                    }
-                </Stack>
-            </Panel>
+            {PanelDefinition}
         </Fabric>
     );
 }
