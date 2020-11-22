@@ -78,7 +78,7 @@ export async function beginExportSolution() {
         debugger;
         for (var i = 0; i < solORders.length; i++) {
             console.log(`Now processing ${solORders[i][1]}`);
-            window.Xrm.Utility.showProgressIndicator(`Now processing ${solORders[i][1]}`);
+            window.Xrm.Utility.showProgressIndicator(`Now exporting ${solORders[i][1]}`);
             var response = await exportSolutionSingle(solORders[i][1])
             var body: any = response.body;
             var stream: ReadableStream = body;
