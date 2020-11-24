@@ -8,8 +8,6 @@ namespace MCS.PSA.DevOps.Plugins
     using Microsoft.Xrm.Sdk.Query;
     using System.Net;
     using System.ServiceModel.Description;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.Serialization.Json;
 
     public class ExecuteImportStatus : IPlugin
     {
@@ -54,9 +52,6 @@ namespace MCS.PSA.DevOps.Plugins
             {
                 context.OutputParameters["ResultJSON"] = $" {{\"message\" : \"{asyncOperation.FormattedValues["statuscode"]}\" ,\"status\" : \"{asyncOperation.FormattedValues["statuscode"]}\"}}";
             }
-
-            
-
         }
 
         private Entity GetAsyncOperationStatus(Guid asyncId, ITracingService tracingService, IPluginExecutionContext context, EntityCollection credentials)
