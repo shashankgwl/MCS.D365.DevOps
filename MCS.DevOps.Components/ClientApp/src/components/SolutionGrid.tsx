@@ -65,19 +65,6 @@ function SolutionGrid() {
 
     const columns: IColumn[] =
         [
-            //{
-            //    key: "friendlyname",
-            //    minWidth: 150,
-            //    name: "Solution Name",
-            //    isResizable: true,
-            //    isCollapsible: true,
-            //    data: 'string',
-
-            //    onRender: (item: ISolution) => {
-            //        return <Label>{item.friendlyname}</Label>;
-            //    }
-            //},
-
             {
                 key: "uniquename",
                 minWidth: 150,

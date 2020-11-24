@@ -38,6 +38,7 @@
     <None Remove="ClientApp\src\components\AuthCheck.tsx" />
     <None Remove="ClientApp\src\components\Counter.js" />
     <None Remove="ClientApp\src\components\CreateSolutionButton.tsx" />
+    <None Remove="ClientApp\src\components\ExportPanel.tsx" />
     <None Remove="ClientApp\src\components\FetchData.js" />
     <None Remove="ClientApp\src\components\Home.js" />
     <None Remove="ClientApp\src\components\ImportPanel.tsx" />
