@@ -266,6 +266,7 @@ function SolutionImportWR() {
 
     const PanelDefinition = () => {
         if (importStatusRecords.length > 0) {
+            console.log('value of open is ' + pnlOpen);
             return (
                 <Panel isLightDismiss isOpen={pnlOpen} type={PanelType.medium} hasCloseButton
                     onDismiss={setPanelOpen}
@@ -276,37 +277,43 @@ function SolutionImportWR() {
                     <div style={{ display: panelLoadInProgress ? "block" : "none", width: "100%", height: "100%" }}>
                         <ProgressIndicator label="Wait" description="Getting data from server." />
                     </div>
-                    <Stack tokens={verticalGapStackTokens} >
-                        {
-                            importStatusRecords.map(progress => {
-                                return (
-                                    <ImportPanel importStatusRecord={progress} UserId={userid} Password={pwd} />
-                                );
-                            })
-                        }
-                    </Stack>
+
+                    {
+                        importStatusRecords.map(progress => {
+                            return (
+                                <Stack tokens={verticalGapStackTokens} >
+                                    <StackItem className="progressCard">
+                                        <ImportPanel importStatusRecord={progress} UserId={userid} Password={pwd} />
+                                    </StackItem>
+                                </Stack>
+                            );
+                        })
+                    }
+
                 </Panel>
             );
         }
 
         else
-            return (
-                <Panel isLightDismiss isOpen={pnlOpen} type={PanelType.medium} hasCloseButton
-                    onDismiss={setPanelOpen}
-                    closeButtonAriaLabel="Close"
+            console.log('value of open is ' + pnlOpen);
 
-                    //isHiddenOnDismiss={true}
-                    headerText="Import progress">
-                    <div style={{ display: panelLoadInProgress ? "block" : "none", width: "100%", height: "100%" }}>
-                        <ProgressIndicator label="Wait" description="Getting data from server." />
-                    </div>
-                    <Stack tokens={verticalGapStackTokens} >
-                        <StackItem>
-                            <h2>No Import Records were found. Did you import?</h2>
-                        </StackItem>
-                    </Stack>
-                </Panel>
-            )
+        return (
+            <Panel isLightDismiss isOpen={pnlOpen} type={PanelType.medium} hasCloseButton
+                onDismiss={setPanelOpen}
+                closeButtonAriaLabel="Close"
+
+                //isHiddenOnDismiss={true}
+                headerText="Import progress">
+                <div style={{ display: panelLoadInProgress ? "block" : "none", width: "100%", height: "100%" }}>
+                    <ProgressIndicator label="Wait" description="Getting data from server." />
+                </div>
+                <Stack tokens={verticalGapStackTokens} >
+                    <StackItem>
+                        <h2>No Import Records were found. Did you import?</h2>
+                    </StackItem>
+                </Stack>
+            </Panel>
+        )
     }
 
 
@@ -387,7 +394,7 @@ function SolutionImportWR() {
                     <PrimaryButton onClick={toggleHideDialog} text="Got it!!" />
                 </DialogFooter>
             </Dialog>
-            {PanelDefinition}
+            {PanelDefinition()}
         </Fabric>
     );
 }

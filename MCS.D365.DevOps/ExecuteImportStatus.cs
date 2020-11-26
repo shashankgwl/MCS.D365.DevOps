@@ -8,6 +8,7 @@ namespace MCS.PSA.DevOps.Plugins
     using Microsoft.Xrm.Sdk.Query;
     using System.Net;
     using System.ServiceModel.Description;
+    using System.Web;
 
     public class ExecuteImportStatus : IPlugin
     {
@@ -28,7 +29,7 @@ namespace MCS.PSA.DevOps.Plugins
 
             tracingService.Trace($"ExecuteImportStatus started...");
 
-            
+
 
             ////Guid importId = Guid.Parse(deployment["devops_importid"].ToString());
             ////tracingService.Trace($"Import ID retrieved is {importId}.");
@@ -43,9 +44,9 @@ namespace MCS.PSA.DevOps.Plugins
             this.UserName = context.InputParameters["UN"].ToString();
             this.Password = context.InputParameters["PW"].ToString();
             Entity asyncOperation = GetAsyncOperationStatus(this.ImportAsyncID, tracingService, context, targetOrgCredentials);
-            if(asyncOperation.Contains("friendlymessage"))
+            if (asyncOperation.Contains("friendlymessage"))
             {
-                context.OutputParameters["ResultJSON"] = $" {{\"message\" : \"{asyncOperation["friendlymessage"]}\" ,\"status\" : \"{asyncOperation.FormattedValues["statuscode"]}\"}}";
+                context.OutputParameters["ResultJSON"] = $" {{\"message\" : \"{asyncOperation["friendlymessage"]}\" ,\"status\" : \"{asyncOperation.FormattedValues["statuscode"]}\",\"messageVerbose\" : \"{HttpUtility.UrlEncode(asyncOperation["message"].ToString())}\"}}";
             }
 
             else
@@ -83,7 +84,7 @@ namespace MCS.PSA.DevOps.Plugins
             if (targetOrganizationService != null)
             {
                 tracingService.Trace($"Connection Established Successfully.");
-                ColumnSet cols = new ColumnSet("statuscode", "friendlymessage", "data");
+                ColumnSet cols = new ColumnSet("statuscode", "friendlymessage", "data", "message");
                 asyncOperation = (Entity)targetOrganizationService.Retrieve("asyncoperation", asyncId, cols);
             }
 

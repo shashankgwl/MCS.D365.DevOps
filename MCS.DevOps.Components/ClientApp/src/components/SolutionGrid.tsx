@@ -195,8 +195,6 @@ function SolutionGrid() {
         </div>
     </Fabric>
     );
-
-
 }
 
 export default SolutionGrid
