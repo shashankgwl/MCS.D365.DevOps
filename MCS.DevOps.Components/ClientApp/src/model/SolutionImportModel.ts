@@ -21,5 +21,6 @@ export interface IImportProgress {
     solutionName: string,
     statusReason: string,
     friendlymessage: string,
+    message?: string,
     hasError: boolean
 }

@@ -56,8 +56,6 @@ export class SolutionImportHelper {
         });
     }
 
-
-
     async getImportStatusOfDeployment(deploymentId?: string | null): Promise<ISolutionImportStatus[]> {
         var records: ISolutionImportStatus[] = [];
         try {
@@ -141,6 +139,7 @@ export class SolutionImportHelper {
                         statusReason: result.status,
                         friendlymessage: result.message,
                         hasError: false,
+                        message: result.messageVerbose,
                         solutionName: ''
                     });
             });
