@@ -107,12 +107,12 @@ function SolutionImportWR() {
         subText: 'Please enter a valid CDS username and password.',
     };
 
-    const getUrlParameter = (name: string) => {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        var results = regex.exec(window.location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-    };
+    //const getUrlParameter = (name: string) => {
+    //    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    //    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    //    var results = regex.exec(window.location.search);
+    //    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    //};
 
     const successdialogContentProps = {
         type: DialogType.normal,
@@ -123,12 +123,13 @@ function SolutionImportWR() {
     const containerStackTokens: IStackTokens = { childrenGap: 20 };
 
     const getExportStatus = () => {
-        var helper: SolutionImportHelper = new SolutionImportHelper();
+        var helper = new SolutionImportHelper();
         setOperationInProgresss(true);
-        console.log(getUrlParameter("id"));
+
+        console.log(`The value of deployment id in getExportStatus = ${helper.getDeploymentId()}`);
         //var deploymentId = localStorage.getItem("deploymentRecordId");
         //alert(deploymentId);
-        helper.getExportStatusOfDeployment(getUrlParameter("id")).then(result => {
+        helper.getExportStatusOfDeployment(helper.getDeploymentId()).then(result => {
             setData(result);
             setOperationInProgresss(false);
         });
@@ -181,7 +182,7 @@ function SolutionImportWR() {
 
     const onViewProgress = async () => {
         var helper: SolutionImportHelper = new SolutionImportHelper();
-        var deploymentId = getUrlParameter("id"); // localStorage.getItem("deploymentRecordId");
+        var deploymentId = helper.getDeploymentId();// getUrlParameter("id"); // localStorage.getItem("deploymentRecordId");
         console.log(`The deployment id is ${deploymentId}`);
         if (chekCredentials() === -1) {
             return;
@@ -216,14 +217,14 @@ function SolutionImportWR() {
     const onImportClick = async () => {
         //if (dummy) { return; }
         var exportStatusRecordId = selItem.devops_exportstatusid;
-        let deploymentRecordID: string = getUrlParameter("id");// localStorage.getItem("deploymentRecordId");
+        var helper = new SolutionImportHelper();
+        let deploymentRecordID: string = helper.getDeploymentId();//getUrlParameter("id");// localStorage.getItem("deploymentRecordId");
         var solutionName = selItem.name;
 
         if (chekCredentials() === -1) {
             return;
         }
         setImportInProgress(true);
-        var helper = new SolutionImportHelper();
         helper.importSolution(deploymentRecordID, exportStatusRecordId, solutionName, userid, pwd, overwrite).then(resp => {
             //alert(resp);
             setImportInProgress(false);
@@ -241,7 +242,7 @@ function SolutionImportWR() {
             setImportInProgress(false);
         });
 
-        //alert(`the export status is ${exportStatusRecordId} and deployment record is ${deploymentRecordID}`);
+        //alert(`the export status is ${ exportStatusRecordId } and deployment record is ${ deploymentRecordID }`);
     }
 
     const onChangeUserID = React.useCallback(

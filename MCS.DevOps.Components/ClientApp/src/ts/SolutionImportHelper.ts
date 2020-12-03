@@ -1,6 +1,5 @@
 ﻿/// <reference path="../../../node_modules/@types/xrm/index.d.ts" />
 
-import { AuthenticationState } from "react-aad-msal";
 import { ISolutionImportStatus, IImportProgress, IXrmresponse, IDevOpsExportStatus } from '../model/SolutionImportModel'
 import { IDevopsSolution, ISolution } from '../model/models'
 
@@ -30,8 +29,23 @@ export class SolutionImportHelper {
         return window.parent.Xrm.Utility.getGlobalContext().getVersion();
     }
 
+    getDeploymentId = (): string => {
+        try {
+            let deploymentId = window.parent.Xrm.Page.data.entity.getId();
+            console.log(`deployment Xrm Page entityID is ${deploymentId}`);
+            return window.parent.Xrm.Page.data.entity.getId();
+        }
+        catch {
+            return ''
+        }
+    }
+
     async getExportStatusOfDeployment(deploymentId?: string | null): Promise<IDevOpsExportStatus[]> {
 
+        if ((deploymentId || '')?.length <= 0) {
+            console.log(`deployment ID is null.`);
+            return [];
+        }
         return new Promise(async (resolve, reject) => {
             let filter: string = '';
             if (this.getDynamicsVersion().startsWith("9.1"))

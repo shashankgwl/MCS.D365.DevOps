@@ -45,6 +45,7 @@
     <None Remove="ClientApp\src\components\Layout.js" />
     <None Remove="ClientApp\src\components\NavMenu.css" />
     <None Remove="ClientApp\src\components\NavMenu.js" />
+    <None Remove="ClientApp\src\components\PageRouter.tsx" />
     <None Remove="ClientApp\src\components\SolutionGrid.tsx" />
     <None Remove="ClientApp\src\components\SolutionImportWR.tsx" />
     <None Remove="ClientApp\src\model\models.ts" />
