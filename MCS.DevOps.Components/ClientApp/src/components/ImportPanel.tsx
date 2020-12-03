@@ -8,13 +8,6 @@ import { ISolutionImportStatus, IImportProgress } from '../model/SolutionImportM
 
 function ImportPanel(props: any) {
 
-    const getUrlParameter = (name: string) => {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        var results = regex.exec(window.location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-    };
-
     const progressObject: IImportProgress = {
         friendlymessage: '',
         statusReason: '',
@@ -55,7 +48,6 @@ function ImportPanel(props: any) {
             },
         },
     });
-    const toggleStyles = { root: { marginBottom: '20px' } };
 
     const iconProp: IIconProps = { iconName: "Cancel" }
 
@@ -76,13 +68,13 @@ function ImportPanel(props: any) {
     const [isModelOpen, { setTrue: showModal, setFalse: hideModal }] = useBoolean(false);
     const [progressStatement, setProgressStatement] = React.useState(progressObject);
     React.useEffect(() => {
+        var helper = new SolutionImportHelper();
         var thisImportStatus = props.importStatusRecord as ISolutionImportStatus;
         var asyncImportId = thisImportStatus.solutionImportId;
-        var deploymentId: any = getUrlParameter("id"); //localStorage.getItem("deploymentRecordId");
+        var deploymentId = helper.getDeploymentId();//getUrlParameter("id"); //localStorage.getItem("deploymentRecordId");
         var usrName = props.UserId;
         var pswd = props.Password;
         setOperationInProgress();
-        var helper = new SolutionImportHelper();
         helper.getImportProgressOnServer(deploymentId, asyncImportId, usrName, pswd)
             .then(resp => {
                 setProgressStatement({
